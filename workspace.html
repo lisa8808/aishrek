@@ -456,8 +456,8 @@
       <div class="panel-section-title">导入零件</div>
       <div class="upload-area" id="uploadArea">
         <div class="upload-icon">⚙️</div>
-        <div class="upload-text">拖入 STL / STEP 文件</div>
-        <div class="upload-hint">支持 .stl .step .stp，最大 10MB</div>
+        <div class="upload-text">拖入或点击上传</div>
+        <div class="upload-hint">支持 stl、step、dxf、dwg、图片、pdf格式</div>
       </div>
       <input type="file" id="fileInput" accept=".stl,.step,.stp,application/sla,model/stl,model/step">
       <div class="loading" id="loading"><div class="spinner"></div></div>
@@ -476,7 +476,7 @@
           <div class="preview-placeholder-text" style="font-size:20px;color:rgba(255,255,255,0.6);margin-bottom:12px;">AI 机械设计专家</div>
           <div class="preview-placeholder-hint" style="max-width:420px;line-height:1.8;font-size:13px;color:rgba(255,255,255,0.35);">
             导入 STL / STEP 零件 → 自动几何分析 → 对话修改参数 → 导出新零件<br><br>
-            <span style="color:rgba(0,217,255,0.5);">拖入文件或点击此处上传</span>
+            <span style="color:rgba(0,217,255,0.5);">拖入或点击上传</span>
           </div>
         </div>
         <canvas id="preview-canvas"></canvas>
