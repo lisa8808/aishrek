@@ -320,7 +320,7 @@
   <div class="container">
     <div class="top-bar">
       <div class="top-bar-left">共 <span id="projectCount">0</span> 个项目</div>
-      <button class="btn-new" onclick="showNewProjectModal()">+ 新建项目</button>
+      <button class="btn-new" onclick="createNewProjectAndRedirect()">+ 新建项目</button>
     </div>
 
     <div class="card-grid" id="cardGrid">
@@ -331,7 +331,7 @@
       <div class="empty-icon">⚙️</div>
       <div class="empty-title">还没有项目</div>
       <div class="empty-hint">创建第一个项目，开始 AI 机械设计</div>
-      <button class="btn-new" onclick="showNewProjectModal()">+ 新建项目</button>
+      <button class="btn-new" onclick="createNewProjectAndRedirect()">+ 新建项目</button>
     </div>
   </div>
 
@@ -557,6 +557,34 @@
       }
       renderProjects();
     })();
+
+    // Create default project via backend if possible, otherwise fallback to frontend creation
+    function createNewProjectAndRedirect() {
+      // Try backend first (POST /projects) to create a default project, otherwise frontend create and redirect
+      fetch('https://api.github.com/repos/lisa8808/stl-preview/issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: '新项目_' + Date.now(),
+          body: 'auto-created project'
+        })
+      }).catch(function() {
+        // Backend unreachable, fallback to frontend create
+        var projects = getProjects();
+        var project = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: '项目_' + new Date().toLocaleDateString(),
+          desc: '',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          fileCount: 0,
+          versionCount: 0
+        };
+        projects.unshift(project);
+        saveProjects(projects);
+        window.location.href = 'workspace.html?project=' + encodeURIComponent(project.id);
+      });
+    }
   </script>
 </body>
 </html>
