@@ -357,15 +357,7 @@
       color: rgba(255,255,255,0.25);
       flex-shrink: 0;
     }
-    .version-detail {
-      margin-top: 6px;
-      padding: 6px 8px;
-      background: rgba(0,0,0,0.18);
-      border-radius: 5px;
-      font-size: 10px;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.4);
-    }
+
     .version-actions {
       display: flex;
       align-items: center;
@@ -2458,19 +2450,11 @@
       div.className = 'version-item ' + statusClass;
       div.dataset.versionId = record.id;
 
-      // Detail info
-      var detailParts = [];
-      if (record.scl) detailParts.push('缩放 ' + record.scl[0].toFixed(2) + ' × ' + record.scl[1].toFixed(2) + ' × ' + record.scl[2].toFixed(2));
-      if (record.pos) detailParts.push('位置 (' + record.pos[0].toFixed(1) + ', ' + record.pos[1].toFixed(1) + ', ' + record.pos[2].toFixed(1) + ')');
-      if (record.rot) detailParts.push('旋转 (' + (record.rot[0]*180/Math.PI).toFixed(1) + '°, ' + (record.rot[1]*180/Math.PI).toFixed(1) + '°, ' + (record.rot[2]*180/Math.PI).toFixed(1) + '°)');
-      if (record.color != null) detailParts.push('颜色 #' + record.color.toString(16).padStart(6, '0'));
-
       div.innerHTML = '<div class="version-top">'
         + '<span class="version-status-dot ' + statusClass + '"></span>'
         + '<span class="version-desc">' + escapeHtml(record.action) + '</span>'
         + '<span class="version-time">' + timeStr + '</span>'
         + '</div>'
-        + (detailParts.length ? '<div class="version-detail">' + detailParts.join(' · ') + '</div>' : '')
         + '<div class="version-actions">'
         + '<span class="version-eye" data-vid="' + record.id + '" title="叠加预览" style="color:' + colorCSS + '">👁</span>'
         + '<span class="version-revert" data-step="' + record.id + '">恢复至此版本</span>'
