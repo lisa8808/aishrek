@@ -399,16 +399,13 @@
     .version-more:hover { color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); }
     .version-menu {
       display: none;
-      position: absolute;
-      right: 0;
-      bottom: 100%;
-      margin-bottom: 4px;
+      position: fixed;
       background: #1e2a3a;
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
       min-width: 120px;
       padding: 4px 0;
-      z-index: 100;
+      z-index: 1000;
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
     .version-menu.show { display: block; }
@@ -2505,7 +2502,20 @@
       moreBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         document.querySelectorAll('.version-menu.show').forEach(function(m) { if (m !== menu) m.classList.remove('show'); });
-        menu.classList.toggle('show');
+        if (!menu.classList.contains('show')) {
+          var rect = moreBtn.getBoundingClientRect();
+          menu.style.top = (rect.bottom + 4) + 'px';
+          menu.style.left = (rect.right - 120) + 'px';
+          if (menu.offsetHeight) {
+            var menuHeight = menu.offsetHeight;
+            if (rect.bottom + 4 + menuHeight > window.innerHeight) {
+              menu.style.top = (rect.top - menuHeight - 4) + 'px';
+            }
+          }
+          menu.classList.add('show');
+        } else {
+          menu.classList.remove('show');
+        }
       });
       // Menu actions
       menu.querySelectorAll('.version-menu-item').forEach(function(item) {
