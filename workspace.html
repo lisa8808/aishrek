@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 机械设计工作台</title>
+  <title>AI-3D设计大师</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -441,7 +441,7 @@
   <header class="header">
     <div class="header-title">
       <a href="index.html" class="header-btn" style="text-decoration:none;margin-right:8px;padding:6px 10px;">← 返回</a>
-      ⚙️ AI 机械设计工作台
+      ⚙️ AI-3D设计大师
       <span id="projectNameDisplay" style="font-size:13px;color:rgba(255,255,255,0.45);margin-left:10px;font-weight:400;"></span>
     </div>
     <div class="header-actions">
@@ -2835,7 +2835,7 @@
           var proj = projects.find(function(p) { return p.id === projectId; });
           if (proj) {
             document.getElementById('projectNameDisplay').textContent = proj.name;
-            document.title = proj.name + ' - AI 机械设计工作台';
+            document.title = proj.name + ' - AI-3D设计大师';
           }
         } catch(e) {}
       }
