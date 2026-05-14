@@ -110,6 +110,28 @@
       font-size: 13px;
       color: rgba(255,255,255,0.7);
     }
+    .user-dropdown-item.clickable {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 2px 0;
+      transition: all 0.15s;
+    }
+    .user-dropdown-item.clickable:hover { background: rgba(0,200,255,0.08); color: #00C8FF; }
+
+    /* Service cards */
+    .service-card {
+      background: #1A1D35;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .service-card:hover { border-color: rgba(0,200,255,0.2); }
+    .service-card-icon { font-size: 28px; margin-bottom: 8px; }
+    .service-card-name { font-size: 13px; font-weight: 600; color: #E5E7EB; margin-bottom: 4px; }
+    .service-card-desc { font-size: 11px; color: #6B7280; margin-bottom: 10px; }
     .user-dropdown-tag {
       font-size: 10px;
       padding: 2px 8px;
@@ -428,37 +450,11 @@
 
   <!-- Personal center dropdown -->
   <div class="user-dropdown" id="userDropdown">
-    <div class="user-dropdown-top">
-      <div class="user-dropdown-avatar">👤</div>
-      <div class="user-dropdown-name">用户</div>
-      <div class="user-dropdown-email">user@example.com</div>
-    </div>
-    <div class="user-dropdown-section">
-      <div class="user-dropdown-section-title">📋 账号信息</div>
-      <div class="user-dropdown-item">账户类型 <span class="user-dropdown-tag">免费版</span></div>
-      <div class="user-dropdown-item">到期时间 <span style="color:rgba(255,255,255,0.35);">无限期</span></div>
-      <div class="user-dropdown-item">项目数量 <span style="color:rgba(255,255,255,0.35);">不限</span></div>
-    </div>
-    <div class="user-dropdown-section">
-      <div class="user-dropdown-section-title">⭐ 增值服务</div>
-      <div class="user-dropdown-item">AI 设计加速 <span class="user-dropdown-tag gold">升级</span></div>
-      <div class="user-dropdown-item">高级几何分析 <span class="user-dropdown-tag">免费</span></div>
-      <div class="user-dropdown-item">批量处理 <span class="user-dropdown-tag gold">升级</span></div>
-    </div>
-    <div class="user-dropdown-section">
-      <div class="user-dropdown-section-title">👥 团队成员</div>
-      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.7);">
-        <div class="user-dropdown-avatar-sm a">A</div>
-        <span>张三 · 管理员</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.7);">
-        <div class="user-dropdown-avatar-sm b">B</div>
-        <span>李四 · 编辑</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.7);">
-        <div class="user-dropdown-avatar-sm c">C</div>
-        <span style="color:rgba(255,255,255,0.3);">+ 邀请成员</span>
-      </div>
+    <div class="user-dropdown-section" style="border-bottom:0;">
+      <div class="user-dropdown-item clickable" onclick="showAccountModal()">👤 账户信息</div>
+      <div class="user-dropdown-item clickable" onclick="showModelModal()">⚙️ 模型设置</div>
+      <div class="user-dropdown-item clickable" onclick="showServiceModal()">⭐ 增值服务</div>
+      <div class="user-dropdown-item clickable" onclick="showMemberModal()">👥 成员管理</div>
     </div>
   </div>
 
@@ -494,6 +490,107 @@
       <div class="modal-actions">
         <button class="modal-btn modal-btn-cancel" onclick="hideModal()">取消</button>
         <button class="modal-btn modal-btn-confirm" onclick="createProject()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Modal -->
+  <div class="modal-overlay" id="accountModalOverlay">
+    <div class="modal" style="width:420px;">
+      <div class="modal-title">👤 账户信息</div>
+      <div style="display:flex;gap:20px;margin-bottom:16px;font-size:12px;color:#9CA3AF;">
+        <div><span style="color:#6B7280;">用户名</span><br><span style="color:#E5E7EB;">AI Designer</span></div>
+        <div><span style="color:#6B7280;">账号</span><br><span style="color:#E5E7EB;">user@example.com</span></div>
+        <div><span style="color:#6B7280;">注册时间</span><br><span style="color:#E5E7EB;">2024-01-15</span></div>
+      </div>
+      <div style="margin-bottom:12px;font-size:12px;color:#6B7280;">套餐：<span style="color:#00C8FF;font-weight:600;">免费版</span> · 无限期</div>
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:14px 0;">
+      <div class="modal-label">修改密码</div>
+      <input class="modal-input" type="password" placeholder="当前密码">
+      <input class="modal-input" type="password" placeholder="新密码">
+      <input class="modal-input" type="password" placeholder="确认新密码">
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('accountModalOverlay').classList.remove('show')">取消</button>
+        <button class="modal-btn modal-btn-confirm">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Settings Modal -->
+  <div class="modal-overlay" id="modelModalOverlay">
+    <div class="modal" style="width:520px;">
+      <div class="modal-title">⚙️ 模型设置</div>
+      <div style="margin-bottom:16px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;" id="modelList">
+        <!-- Models rendered here -->
+      </div>
+      <button class="btn-new" style="width:100%;justify-content:center;font-size:13px;" onclick="addModelRow()">+ 新增模型</button>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modelModalOverlay').classList.remove('show')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Modal -->
+  <div class="modal-overlay" id="serviceModalOverlay">
+    <div class="modal" style="width:560px;">
+      <div class="modal-title">⭐ 增值服务</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
+        <div class="service-card">
+          <div class="service-card-icon">📦</div>
+          <div class="service-card-name">基础版</div>
+          <div class="service-card-desc">STL预览、基础分析</div>
+          <span class="user-dropdown-tag" style="background:rgba(0,200,255,0.15);color:#00C8FF;">已开通</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card-icon">🔧</div>
+          <div class="service-card-name">建模与分析</div>
+          <div class="service-card-desc">AI驱动建模、几何分析</div>
+          <span class="user-dropdown-tag" style="background:rgba(0,200,255,0.15);color:#00C8FF;">已开通</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card-icon">📐</div>
+          <div class="service-card-name">平面转三维</div>
+          <div class="service-card-desc">图纸智能转3D模型</div>
+          <span class="user-dropdown-tag gold">升级</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card-icon">📏</div>
+          <div class="service-card-name">三维转平面</div>
+          <div class="service-card-desc">模型自动出工程图</div>
+          <span class="user-dropdown-tag gold">升级</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card-icon">🧪</div>
+          <div class="service-card-name">专业仿真</div>
+          <div class="service-card-desc">有限元分析、流体仿真</div>
+          <span class="user-dropdown-tag gold">升级</span>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('serviceModalOverlay').classList.remove('show')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Management Modal -->
+  <div class="modal-overlay" id="memberModalOverlay">
+    <div class="modal" style="width:480px;">
+      <div class="modal-title">👥 成员管理</div>
+      <div style="margin-bottom:12px;max-height:260px;overflow-y:auto;" id="memberList">
+        <!-- Members rendered here -->
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input class="modal-input" id="newMemberName" placeholder="成员姓名" style="flex:2;margin-bottom:0;">
+        <input class="modal-input" id="newMemberAccount" placeholder="账号" style="flex:2;margin-bottom:0;">
+        <select class="modal-input" id="newMemberRole" style="flex:1;margin-bottom:0;">
+          <option value="编辑">编辑</option>
+          <option value="管理员">管理员</option>
+          <option value="只读">只读</option>
+        </select>
+      </div>
+      <button class="btn-new" style="width:100%;justify-content:center;font-size:13px;" onclick="addMember()">+ 添加成员</button>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('memberModalOverlay').classList.remove('show')">关闭</button>
       </div>
     </div>
   </div>
@@ -746,6 +843,129 @@
         dd.classList.remove('show');
       }
     });
+
+    // Modal show functions
+    function showAccountModal() {
+      document.getElementById('userDropdown').classList.remove('show');
+      document.getElementById('accountModalOverlay').classList.add('show');
+    }
+    function showModelModal() {
+      document.getElementById('userDropdown').classList.remove('show');
+      document.getElementById('modelModalOverlay').classList.add('show');
+      renderModelList();
+    }
+    function showServiceModal() {
+      document.getElementById('userDropdown').classList.remove('show');
+      document.getElementById('serviceModalOverlay').classList.add('show');
+    }
+    function showMemberModal() {
+      document.getElementById('userDropdown').classList.remove('show');
+      document.getElementById('memberModalOverlay').classList.add('show');
+      renderMemberList();
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(function(ov) {
+      ov.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+    });
+
+    // --- Model Settings ---
+    var modelIdCounter = 0;
+    function getModels() {
+      try { return JSON.parse(localStorage.getItem('stl_ai_models') || '[]'); } catch(e) { return []; }
+    }
+    function saveModels(models) { localStorage.setItem('stl_ai_models', JSON.stringify(models)); }
+
+    function renderModelList() {
+      var models = getModels();
+      if (models.length === 0) {
+        models = [{
+          id: ++modelIdCounter, name: 'DeepSeek-V4', baseUrl: 'https://api.deepseek.com/v1',
+          apiKey: 'sk-***', modelName: 'deepseek-v4', isDefault: true
+        }];
+        saveModels(models);
+      }
+      var container = document.getElementById('modelList');
+      container.innerHTML = '';
+      models.forEach(function(m) {
+        var isDefault = m.isDefault;
+        var div = document.createElement('div');
+        div.style.cssText = 'padding:10px 12px;background:#0F1225;border:1px solid rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;' + (isDefault ? 'border-color:rgba(0,200,255,0.3);' : '');
+        div.innerHTML = '<span style="font-size:12px;font-weight:600;flex:1;min-width:80px;">' + escapeHtml(m.name) + '</span>'
+          + '<span style="font-size:10px;color:#6B7280;min-width:80px;">' + escapeHtml(m.modelName) + '</span>'
+          + '<span style="font-size:10px;color:#6B7280;min-width:40px;">' + (isDefault ? '<span style="color:#00C8FF;">默认</span>' : '<span style="cursor:pointer;color:#9CA3AF;" onclick="setDefaultModel(' + m.id + ')">设默认</span>') + '</span>'
+          + '<span style="font-size:10px;color:#6B7280;cursor:pointer;" onclick="deleteModel(' + m.id + ')">删除</span>';
+        container.appendChild(div);
+      });
+    }
+    function addModelRow() {
+      var models = getModels();
+      models.push({
+        id: ++modelIdCounter, name: '新模型 ' + modelIdCounter,
+        baseUrl: 'https://api.openai.com/v1', apiKey: 'sk-***', modelName: 'gpt-4o', isDefault: false
+      });
+      saveModels(models);
+      renderModelList();
+    }
+    function setDefaultModel(id) {
+      var models = getModels();
+      models.forEach(function(m) { m.isDefault = (m.id === id); });
+      saveModels(models);
+      renderModelList();
+    }
+    function deleteModel(id) {
+      var models = getModels().filter(function(m) { return m.id !== id; });
+      saveModels(models);
+      renderModelList();
+    }
+
+    // --- Member Management ---
+    function getMembers() {
+      try { return JSON.parse(localStorage.getItem('stl_members') || '[]'); } catch(e) { return []; }
+    }
+    function saveMembers(members) { localStorage.setItem('stl_members', JSON.stringify(members)); }
+
+    function renderMemberList() {
+      var members = getMembers();
+      if (members.length === 0) {
+        members = [
+          { name: '张三', account: 'zhangsan@demo.com', role: '管理员', time: '2024-02-10' },
+          { name: '李四', account: 'lisi@demo.com', role: '编辑', time: '2024-03-22' }
+        ];
+        saveMembers(members);
+      }
+      var container = document.getElementById('memberList');
+      container.innerHTML = '';
+      members.forEach(function(m, idx) {
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:#0F1225;border-radius:8px;margin-bottom:4px;font-size:12px;';
+        div.innerHTML = '<span style="width:28px;height:28px;border-radius:50%;background:' + (idx===0?'#00C8FF':idx===1?'#FF6B6B':'#A29BFE') + ';display:flex;align-items:center;justify-content:center;font-size:11px;">' + m.name.charAt(0) + '</span>'
+          + '<span style="flex:1;color:#E5E7EB;">' + escapeHtml(m.name) + '</span>'
+          + '<span style="color:#6B7280;min-width:120px;">' + escapeHtml(m.account) + '</span>'
+          + '<span style="color:#00C8FF;min-width:40px;">' + escapeHtml(m.role) + '</span>'
+          + '<span style="color:#6B7280;min-width:60px;">' + m.time + '</span>'
+          + '<span style="color:#EF4444;cursor:pointer;font-size:11px;" onclick="deleteMember(' + idx + ')">删除</span>';
+        container.appendChild(div);
+      });
+    }
+    function addMember() {
+      var name = document.getElementById('newMemberName').value.trim();
+      var account = document.getElementById('newMemberAccount').value.trim();
+      var role = document.getElementById('newMemberRole').value;
+      if (!name || !account) return;
+      var members = getMembers();
+      members.push({ name: name, account: account, role: role, time: new Date().toISOString().slice(0,10) });
+      saveMembers(members);
+      document.getElementById('newMemberName').value = '';
+      document.getElementById('newMemberAccount').value = '';
+      renderMemberList();
+    }
+    function deleteMember(idx) {
+      var members = getMembers();
+      members.splice(idx, 1);
+      saveMembers(members);
+      renderMemberList();
+    }
   </script>
 </body>
 </html>
