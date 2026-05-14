@@ -458,20 +458,29 @@
 
   <!-- Model Settings Modal -->
   <div class="modal-overlay" id="modelModalOverlay">
-    <div class="modal" style="width:520px;">
+    <div class="modal" style="width:480px;">
       <div class="modal-title">⚙️ 模型设置</div>
-      <div style="margin-bottom:16px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;" id="modelList"></div>
-      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;">
-        <div class="modal-label">Base URL</div>
-        <input class="modal-input" id="modelBaseUrl" placeholder="https://api.example.com/v1">
-        <div class="modal-label">API Key</div>
-        <input class="modal-input" id="modelApiKey" placeholder="sk-...">
-        <div class="modal-label">Model Name</div>
-        <input class="modal-input" id="modelModelName" placeholder="gpt-4o" style="margin-bottom:12px;">
-        <button class="btn-new" style="width:100%;justify-content:center;font-size:13px;" onclick="addModelRow()">+ 新增模型</button>
-      </div>
+      <div style="margin-bottom:14px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;" id="modelList"></div>
+      <button class="btn-new" style="width:100%;justify-content:center;font-size:13px;" onclick="showAddModelForm()">+ 新增模型</button>
       <div class="modal-actions" style="margin-top:14px;">
         <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modelModalOverlay').classList.remove('show')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Model Modal -->
+  <div class="modal-overlay" id="addModelOverlay">
+    <div class="modal" style="width:400px;">
+      <div class="modal-title">+ 新增模型</div>
+      <div class="modal-label">Base URL</div>
+      <input class="modal-input" id="modelBaseUrl" placeholder="https://api.example.com/v1">
+      <div class="modal-label">API Key</div>
+      <input class="modal-input" id="modelApiKey" placeholder="sk-...">
+      <div class="modal-label">Model Name</div>
+      <input class="modal-input" id="modelModelName" placeholder="gpt-4o" style="margin-bottom:12px;">
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('addModelOverlay').classList.remove('show')">取消</button>
+        <button class="modal-btn modal-btn-confirm" onclick="addModelRow()">添加</button>
       </div>
     </div>
   </div>
@@ -840,6 +849,9 @@
         container.appendChild(div);
       });
     }
+    function showAddModelForm() {
+      document.getElementById('addModelOverlay').classList.add('show');
+    }
     function addModelRow() {
       var baseUrl = document.getElementById('modelBaseUrl').value.trim();
       var apiKey = document.getElementById('modelApiKey').value.trim();
@@ -854,6 +866,7 @@
       document.getElementById('modelBaseUrl').value = '';
       document.getElementById('modelApiKey').value = '';
       document.getElementById('modelModelName').value = '';
+      document.getElementById('addModelOverlay').classList.remove('show');
       renderModelList();
     }
     function setDefaultModel(id) {
