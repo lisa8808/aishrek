@@ -834,8 +834,7 @@
         var isDefault = m.isDefault;
         var div = document.createElement('div');
         div.style.cssText = 'padding:10px 12px;background:#0F1225;border:1px solid rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;' + (isDefault ? 'border-color:rgba(0,200,255,0.3);' : '');
-        div.innerHTML = '<span style="font-size:12px;font-weight:600;flex:0 0 140px;">' + escapeHtml(m.name) + '</span>'
-          + '<span style="font-size:10px;color:#6B7280;flex:1;padding-left:8px;">' + escapeHtml(m.modelName) + '</span>'
+        div.innerHTML = '<span style="font-size:12px;font-weight:600;flex:1;">' + escapeHtml(m.modelName) + '</span>'
           + '<span style="font-size:10px;color:#6B7280;min-width:40px;">' + (isDefault ? '<span style="color:#00C8FF;">默认</span>' : '<span style="cursor:pointer;color:#9CA3AF;" onclick="setDefaultModel(' + m.id + ')">设默认</span>') + '</span>'
           + '<span style="font-size:10px;color:#6B7280;cursor:pointer;" onclick="deleteModel(' + m.id + ')">删除</span>';
         container.appendChild(div);
