@@ -33,15 +33,24 @@
       gap: 8px;
     }
     .header-title .hl { color: #00D4FF; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-right { display: flex; align-items: center; gap: 12px; position: relative; }
+    .user-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
     .user-avatar {
       width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, #00D4FF, #0088CC);
+      background: linear-gradient(135deg, #1A213A, #12182B);
+      border: 1.5px solid rgba(0,212,255,0.3);
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; transition: all 0.2s;
-      border: 2px solid rgba(0,212,255,0.25); color: #fff; font-weight: 700;
+      font-size: 16px; transition: all 0.2s;
+      color: #00D4FF;
     }
-    .user-avatar:hover { border-color: #00D4FF; box-shadow: 0 0 12px rgba(0,212,255,0.2); }
+    .user-avatar:hover { border-color: #00D4FF; box-shadow: 0 0 12px rgba(0,212,255,0.15); }
+    .user-name { font-size: 11px; color: #8892B0; font-weight: 400; }
 
     /* Personal center dropdown */
     .user-dropdown {
@@ -364,7 +373,10 @@
       ⚙️ <span class="hl">AI</span> 机械设计 <span class="hl">工作台</span>
     </div>
     <div class="header-right">
-      <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown(event)">👤</div>
+      <div class="user-area" onclick="toggleUserDropdown(event)">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-name">用户</div>
+      </div>
     </div>
   </header>
 
@@ -760,8 +772,8 @@
     }
     document.addEventListener('click', function(e) {
       var dd = document.getElementById('userDropdown');
-      var av = document.getElementById('userAvatar');
-      if (dd.classList.contains('show') && !dd.contains(e.target) && e.target !== av) {
+      var ua = document.querySelector('.user-area');
+      if (dd.classList.contains('show') && !dd.contains(e.target) && (!ua || !ua.contains(e.target))) {
         dd.classList.remove('show');
       }
     });
