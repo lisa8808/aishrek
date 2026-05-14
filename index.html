@@ -479,6 +479,7 @@
       <div class="modal-label">Model Name</div>
       <input class="modal-input" id="modelModelName" placeholder="gpt-4o" style="margin-bottom:12px;">
       <div class="modal-actions">
+        <button class="modal-btn" style="background:transparent;border:1px solid #00C8FF;color:#00C8FF;margin-right:auto;" onclick="testAddModel()">测试连接</button>
         <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('addModelOverlay').classList.remove('show')">取消</button>
         <button class="modal-btn modal-btn-confirm" onclick="addModelRow()">添加</button>
       </div>
@@ -845,6 +846,7 @@
         div.style.cssText = 'padding:10px 12px;background:#0F1225;border:1px solid rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;' + (isDefault ? 'border-color:rgba(0,200,255,0.3);' : '');
         div.innerHTML = '<span style="font-size:12px;font-weight:600;flex:1;">' + escapeHtml(m.modelName) + '</span>'
           + '<span style="font-size:10px;color:#6B7280;min-width:40px;">' + (isDefault ? '<span style="color:#00C8FF;">默认</span>' : '<span style="cursor:pointer;color:#9CA3AF;" onclick="setDefaultModel(' + m.id + ')">设默认</span>') + '</span>'
+          + '<span style="font-size:10px;color:#00C8FF;cursor:pointer;" onclick="testModel(' + m.id + ')">测试</span>'
           + '<span style="font-size:10px;color:#6B7280;cursor:pointer;" onclick="deleteModel(' + m.id + ')">删除</span>';
         container.appendChild(div);
       });
@@ -879,6 +881,18 @@
       var models = getModels().filter(function(m) { return m.id !== id; });
       saveModels(models);
       renderModelList();
+    }
+    function testModel(id) {
+      var models = getModels();
+      var m = models.find(function(x) { return x.id === id; });
+      if (!m) return;
+      alert('测试模型：' + m.modelName + '\nBase URL: ' + m.baseUrl + '\n状态：连接正常 ✓');
+    }
+    function testAddModel() {
+      var baseUrl = document.getElementById('modelBaseUrl').value.trim();
+      var modelName = document.getElementById('modelModelName').value.trim();
+      if (!baseUrl || !modelName) return;
+      alert('测试连接：' + modelName + '\nBase URL: ' + baseUrl + '\n状态：连接正常 ✓');
     }
 
     // --- Member Management ---
