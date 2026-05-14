@@ -116,18 +116,79 @@
     .user-dropdown-item.clickable:hover { background: rgba(0,200,255,0.08); color: #00C8FF; }
 
     /* Service cards */
-    .service-card {
-      background: #1A1D35;
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      transition: border-color 0.2s;
+    .svc-modal {
+      background: #111321;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: 820px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
     }
-    .service-card:hover { border-color: rgba(0,200,255,0.2); }
-    .service-card-icon { font-size: 28px; margin-bottom: 8px; }
-    .service-card-name { font-size: 13px; font-weight: 600; color: #E5E7EB; margin-bottom: 4px; }
-    .service-card-desc { font-size: 11px; color: #6B7280; margin-bottom: 10px; }
+    .svc-close {
+      position: absolute;
+      top: 16px; right: 20px;
+      width: 24px; height: 24px;
+      background: none; border: none;
+      color: #8892B0; font-size: 20px;
+      cursor: pointer; line-height: 1;
+    }
+    .svc-close:hover { color: #fff; }
+    .svc-title {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 24px;
+    }
+    .svc-title-icon {
+      width: 36px; height: 36px;
+      background: #1D233D; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .svc-title-text {
+      font-size: 20px; font-weight: 700; color: #FFFFFF;
+    }
+    .svc-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .svc-card {
+      background: #171A2F;
+      border: 1px solid #2B3050;
+      border-radius: 10px;
+      padding: 24px;
+      display: flex; flex-direction: column;
+    }
+    .svc-card-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .svc-card-icon {
+      width: 40px; height: 40px;
+      background: #1D233D; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .svc-card-tag {
+      padding: 4px 14px; border-radius: 16px;
+      font-size: 14px; font-weight: 500;
+    }
+    .svc-card-tag.active { background: #00E0FF; color: #FFFFFF; }
+    .svc-card-tag.inactive { background: #2B3050; color: #FFFFFF; }
+    .svc-card-title { font-size: 18px; font-weight: 600; color: #FFFFFF; margin-bottom: 8px; }
+    .svc-card-desc { font-size: 15px; color: #B0B8D4; line-height: 1.6; flex: 1; }
+    .svc-card-bottom { margin-top: 24px; text-align: center; }
+    .svc-card-link { font-size: 16px; color: #00E0FF; cursor: pointer; background: none; border: none; }
+    .svc-card-link:hover { text-decoration: underline; }
+    .svc-card-btn {
+      width: 100%; padding: 10px 0;
+      background: transparent; border: 1px solid #3A4065;
+      border-radius: 6px; color: #FFFFFF; font-size: 16px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .svc-card-btn:hover { border-color: #00E0FF; color: #00E0FF; }
     .user-dropdown-tag {
       font-size: 10px;
       padding: 2px 8px;
@@ -488,42 +549,73 @@
 
   <!-- Service Modal -->
   <div class="modal-overlay" id="serviceModalOverlay">
-    <div class="modal" style="width:560px;">
-      <div class="modal-title">⭐ 增值服务</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
-        <div class="service-card">
-          <div class="service-card-icon">📦</div>
-          <div class="service-card-name">基础版</div>
-          <div class="service-card-desc">STL预览、基础分析</div>
-          <span class="user-dropdown-tag" style="background:rgba(0,200,255,0.15);color:#00C8FF;">已开通</span>
-        </div>
-        <div class="service-card">
-          <div class="service-card-icon">🔧</div>
-          <div class="service-card-name">建模与分析</div>
-          <div class="service-card-desc">AI驱动建模、几何分析</div>
-          <span class="user-dropdown-tag" style="background:rgba(0,200,255,0.15);color:#00C8FF;">已开通</span>
-        </div>
-        <div class="service-card">
-          <div class="service-card-icon">📐</div>
-          <div class="service-card-name">平面转三维</div>
-          <div class="service-card-desc">图纸智能转3D模型</div>
-          <span class="user-dropdown-tag gold">升级</span>
-        </div>
-        <div class="service-card">
-          <div class="service-card-icon">📏</div>
-          <div class="service-card-name">三维转平面</div>
-          <div class="service-card-desc">模型自动出工程图</div>
-          <span class="user-dropdown-tag gold">升级</span>
-        </div>
-        <div class="service-card">
-          <div class="service-card-icon">🧪</div>
-          <div class="service-card-name">专业仿真</div>
-          <div class="service-card-desc">有限元分析、流体仿真</div>
-          <span class="user-dropdown-tag gold">升级</span>
-        </div>
+    <div class="svc-modal">
+      <button class="svc-close" onclick="document.getElementById('serviceModalOverlay').classList.remove('show')">✕</button>
+      <div class="svc-title">
+        <div class="svc-title-icon">🧊</div>
+        <span class="svc-title-text">增值服务与权益</span>
       </div>
-      <div class="modal-actions" style="margin-top:16px;">
-        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('serviceModalOverlay').classList.remove('show')">关闭</button>
+      <div class="svc-grid">
+        <!-- Card 1 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">🛡️</div>
+            <span class="svc-card-tag active">已启用</span>
+          </div>
+          <div class="svc-card-title">基础版核心</div>
+          <div class="svc-card-desc">包含 3D 模型渲染、基础设计工具集和5GB 云端存储空间。</div>
+          <div class="svc-card-bottom"><span class="svc-card-link">查看权益</span></div>
+        </div>
+        <!-- Card 2 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">🤖</div>
+            <span class="svc-card-tag active">已启用</span>
+          </div>
+          <div class="svc-card-title">建模与分析 AI</div>
+          <div class="svc-card-desc">解锁高级拓扑优化、参数化建模建议以及生成式设计算法支持。</div>
+          <div class="svc-card-bottom"><span class="svc-card-link">查看权益</span></div>
+        </div>
+        <!-- Card 3 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">📐</div>
+            <span class="svc-card-tag inactive">未购买</span>
+          </div>
+          <div class="svc-card-title">平面转三维专家</div>
+          <div class="svc-card-desc">支持从 CAD 二维图纸一键生成高精度三维机械模型组件。</div>
+          <div class="svc-card-bottom"><button class="svc-card-btn">立即订阅</button></div>
+        </div>
+        <!-- Card 4 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">🔗</div>
+            <span class="svc-card-tag inactive">未购买</span>
+          </div>
+          <div class="svc-card-title">智能装配仿真</div>
+          <div class="svc-card-desc">进行动力学仿真分析，自动检测零件干涉并提供优化改进建议。</div>
+          <div class="svc-card-bottom"><button class="svc-card-btn">立即订阅</button></div>
+        </div>
+        <!-- Card 5 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">✨</div>
+            <span class="svc-card-tag inactive">未购买</span>
+          </div>
+          <div class="svc-card-title">专业渲染引擎</div>
+          <div class="svc-card-desc">通过云端 GPU 阵列为您的机械作品提供照片级写实渲染效果。</div>
+          <div class="svc-card-bottom"><button class="svc-card-btn">立即订阅</button></div>
+        </div>
+        <!-- Card 6 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">⚡</div>
+            <span class="svc-card-tag inactive">未购买</span>
+          </div>
+          <div class="svc-card-title">高性能工作流</div>
+          <div class="svc-card-desc">优先队列处理、无限制历史版本保存以及高性能计算节点访问。</div>
+          <div class="svc-card-bottom"><button class="svc-card-btn">立即订阅</button></div>
+        </div>
       </div>
     </div>
   </div>
