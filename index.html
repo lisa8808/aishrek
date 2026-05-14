@@ -36,6 +36,97 @@
       margin-left: 12px;
       font-weight: 400;
     }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00d9ff, #0099cc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+    .user-avatar:hover { border-color: rgba(0,217,255,0.4); }
+
+    /* Personal center dropdown */
+    .user-dropdown {
+      display: none;
+      position: fixed;
+      top: 56px;
+      right: 32px;
+      width: 300px;
+      background: #1e2a3a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      z-index: 1000;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .user-dropdown.show { display: block; }
+    .user-dropdown-top {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .user-dropdown-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00d9ff, #0099cc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 10px;
+    }
+    .user-dropdown-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+    .user-dropdown-email { font-size: 12px; color: rgba(255,255,255,0.35); }
+    .user-dropdown-section {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .user-dropdown-section:last-child { border-bottom: none; }
+    .user-dropdown-section-title {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+    }
+    .user-dropdown-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(0,217,255,0.15);
+      color: #00d9ff;
+    }
+    .user-dropdown-tag.gold { background: rgba(255,200,0,0.15); color: #ffc800; }
+    .user-dropdown-avatar-sm {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    .user-dropdown-avatar-sm.a { background: #00d9ff; }
+    .user-dropdown-avatar-sm.b { background: #ff6b6b; }
+    .user-dropdown-avatar-sm.c { background: #00ff88; color: #000; }
 
     /* Container */
     .container {
@@ -315,7 +406,46 @@
       ⚙️ AI 机械设计工作台
       <span class="header-subtitle">项目列表</span>
     </div>
+    <div class="header-right">
+      <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown(event)">👤</div>
+    </div>
   </header>
+
+  <!-- Personal center dropdown -->
+  <div class="user-dropdown" id="userDropdown">
+    <div class="user-dropdown-top">
+      <div class="user-dropdown-avatar">👤</div>
+      <div class="user-dropdown-name">用户</div>
+      <div class="user-dropdown-email">user@example.com</div>
+    </div>
+    <div class="user-dropdown-section">
+      <div class="user-dropdown-section-title">📋 账号信息</div>
+      <div class="user-dropdown-item">账户类型 <span class="user-dropdown-tag">免费版</span></div>
+      <div class="user-dropdown-item">到期时间 <span style="color:rgba(255,255,255,0.35);">无限期</span></div>
+      <div class="user-dropdown-item">项目数量 <span style="color:rgba(255,255,255,0.35);">不限</span></div>
+    </div>
+    <div class="user-dropdown-section">
+      <div class="user-dropdown-section-title">⭐ 增值服务</div>
+      <div class="user-dropdown-item">AI 设计加速 <span class="user-dropdown-tag gold">升级</span></div>
+      <div class="user-dropdown-item">高级几何分析 <span class="user-dropdown-tag">免费</span></div>
+      <div class="user-dropdown-item">批量处理 <span class="user-dropdown-tag gold">升级</span></div>
+    </div>
+    <div class="user-dropdown-section">
+      <div class="user-dropdown-section-title">👥 团队成员</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.7);">
+        <div class="user-dropdown-avatar-sm a">A</div>
+        <span>张三 · 管理员</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.7);">
+        <div class="user-dropdown-avatar-sm b">B</div>
+        <span>李四 · 编辑</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.7);">
+        <div class="user-dropdown-avatar-sm c">C</div>
+        <span style="color:rgba(255,255,255,0.3);">+ 邀请成员</span>
+      </div>
+    </div>
+  </div>
 
   <div class="container">
     <div class="top-bar">
@@ -574,6 +704,19 @@
       saveProjects(projects);
       window.location.href = 'workspace.html?project=' + encodeURIComponent(project.id);
     }
+
+    // Personal center dropdown toggle
+    function toggleUserDropdown(e) {
+      e.stopPropagation();
+      document.getElementById('userDropdown').classList.toggle('show');
+    }
+    document.addEventListener('click', function(e) {
+      var dd = document.getElementById('userDropdown');
+      var av = document.getElementById('userAvatar');
+      if (dd.classList.contains('show') && !dd.contains(e.target) && e.target !== av) {
+        dd.classList.remove('show');
+      }
+    });
   </script>
 </body>
 </html>
