@@ -152,6 +152,20 @@
       color: #00d9ff;
       font-weight: 600;
     }
+    .search-input {
+      padding: 8px 14px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: #E5E7EB;
+      font-size: 13px;
+      font-family: inherit;
+      width: 220px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: rgba(0,217,255,0.4); }
+    .search-input::placeholder { color: rgba(255,255,255,0.25); }
 
     /* New project button */
     .btn-new {
@@ -451,7 +465,10 @@
   <div class="container">
     <div class="top-bar">
       <div class="top-bar-left">项目列表 · 共 <span id="projectCount">0</span> 个项目</div>
-      <button class="btn-new" onclick="createNewProjectAndRedirect()">+ 新建项目</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input class="search-input" id="searchInput" placeholder="搜索项目..." oninput="renderProjects()">
+        <button class="btn-new" onclick="createNewProjectAndRedirect()">+ 新建项目</button>
+      </div>
     </div>
 
     <div class="card-grid" id="cardGrid">
@@ -598,16 +615,27 @@
     }
 
     function renderProjects() {
-      const projects = getProjects();
-      const grid = document.getElementById('cardGrid');
-      const empty = document.getElementById('emptyState');
-      const countEl = document.getElementById('projectCount');
+      var projects = getProjects();
+      var searchTerm = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      var filtered = searchTerm
+        ? projects.filter(function(p) { return p.name.toLowerCase().includes(searchTerm) || (p.desc && p.desc.toLowerCase().includes(searchTerm)); })
+        : projects;
+      var grid = document.getElementById('cardGrid');
+      var empty = document.getElementById('emptyState');
+      var countEl = document.getElementById('projectCount');
 
-      countEl.textContent = projects.length;
+      countEl.textContent = filtered.length;
 
-      if (projects.length === 0) {
+      if (filtered.length === 0) {
         grid.style.display = 'none';
         empty.style.display = 'block';
+        if (searchTerm) {
+          empty.querySelector('.empty-title').textContent = '无匹配项目';
+          empty.querySelector('.empty-hint').textContent = '尝试其他关键词';
+        } else {
+          empty.querySelector('.empty-title').textContent = '还没有项目';
+          empty.querySelector('.empty-hint').textContent = '创建第一个项目，开始 AI 机械设计';
+        }
         return;
       }
 
@@ -615,7 +643,7 @@
       empty.style.display = 'none';
       grid.innerHTML = '';
 
-      projects.forEach(proj => {
+      filtered.forEach(function(proj) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.id = proj.id;
