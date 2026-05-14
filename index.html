@@ -173,8 +173,8 @@
       cursor: pointer;
     }
     .search-input {
-      padding: 8px 14px 8px 34px;
-      background: #12182B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%238892B0'%3E%3Cpath d='M10.5 9.5l3 3M12 6.5A5.5 5.5 0 1 1 1 6.5 5.5 5.5 0 0 1 12 6.5z'/%3E%3C/svg%3E") 10px center no-repeat;
+      padding: 8px 14px;
+      background: #12182B;
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 8px;
       color: #FFFFFF;
@@ -226,7 +226,7 @@
     }
 
     .card-preview {
-      height: 120px;
+      height: 140px;
       background: #0F1320;
       display: flex;
       align-items: center;
@@ -235,7 +235,8 @@
       gap: 8px;
       border-bottom: 1px solid rgba(255,255,255,0.03);
     }
-    .card-preview-icon { font-size: 32px; color: #333; }
+    .card-preview-icon { font-size: 32px; color: #4a5568; animation: gear-spin 8s linear infinite; }
+    @keyframes gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .card-preview-text { font-size: 12px; color: #8892B0; }
 
     .card-body {
@@ -244,7 +245,7 @@
     }
     .card-name {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       color: #FFFFFF;
       margin-bottom: 8px;
       white-space: nowrap;
