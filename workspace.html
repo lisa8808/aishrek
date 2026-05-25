@@ -2799,7 +2799,9 @@
     };
 
     window.exportDrawing = function() {
-      alert('平面图导出需要后端服务支持，当前版本暂不可用。\n即将支持导出 DXF/DWG 格式工程图。');
+      if (confirm('暂未开通相关服务，是否前往增值服务中心进行开通？')) {
+        window.open('index.html', '_blank');
+      }
     };
 
     // Delete a version record
