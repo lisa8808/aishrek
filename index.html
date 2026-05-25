@@ -895,6 +895,12 @@
 
     // Init: if no projects, auto-create a default one and jump to workspace
     (function() {
+      // Handle hash for service modal
+      if (window.location.hash === '#service') {
+        history.replaceState(null, '', window.location.pathname);
+        // Wait for projects to render, then open service modal
+        setTimeout(function() { showServiceModal(); }, 500);
+      }
       var projects = getProjects();
       if (projects.length === 0) {
         var project = {
