@@ -487,6 +487,7 @@
           <button class="preview-btn" id="btn-original" onclick="toggleOriginal()">回到原稿</button>
           <button class="preview-btn" onclick="exportSTL()">导出 STL</button>
           <button class="preview-btn" onclick="exportSTEP()">导出 STEP</button>
+          <button class="preview-btn" onclick="exportDrawing()">导出平面图</button>
         </div>
       </div>
 
@@ -2795,6 +2796,10 @@
     // Export current model as STEP (global button)
     window.exportSTEP = function() {
       alert('STEP 导出需要后端服务支持，当前版本暂不可用。\n请先导出 STL，再用 FreeCAD 或 MeshLab 转换为 STEP。');
+    };
+
+    window.exportDrawing = function() {
+      alert('平面图导出需要后端服务支持，当前版本暂不可用。\n即将支持导出 DXF/DWG 格式工程图。');
     };
 
     // Delete a version record
