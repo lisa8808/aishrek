@@ -624,11 +624,12 @@
         <!-- Members rendered here -->
       </div>
       <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input class="modal-input" id="newMemberName" placeholder="成员姓名" style="flex:2;margin-bottom:0;">
-        <input class="modal-input" id="newMemberAccount" placeholder="账号" style="flex:2;margin-bottom:0;">
+        <input class="modal-input" id="newMemberName" placeholder="用户名" style="flex:1;margin-bottom:0;">
+        <input class="modal-input" id="newMemberAccount" placeholder="账号" style="flex:1;margin-bottom:0;">
+        <input class="modal-input" type="password" id="newMemberPassword" placeholder="密码" style="flex:1;margin-bottom:0;">
         <select class="modal-input" id="newMemberRole" style="flex:1;margin-bottom:0;">
           <option value="管理员">管理员</option>
-          <option value="成员">成员</option>
+          <option value="普通用户">普通用户</option>
         </select>
       </div>
       <button class="btn-new" style="width:100%;justify-content:center;font-size:13px;" onclick="addMember()">+ 添加成员</button>
@@ -993,7 +994,7 @@
       if (members.length === 0) {
         members = [
           { name: '张三', account: 'zhangsan@demo.com', role: '管理员', time: '2024-02-10' },
-          { name: '李四', account: 'lisi@demo.com', role: '成员', time: '2024-03-22' }
+          { name: '李四', account: 'lisi@demo.com', role: '普通用户', time: '2024-03-22' }
         ];
         saveMembers(members);
       }
@@ -1014,6 +1015,7 @@
     function addMember() {
       var name = document.getElementById('newMemberName').value.trim();
       var account = document.getElementById('newMemberAccount').value.trim();
+      var password = document.getElementById('newMemberPassword').value.trim();
       var role = document.getElementById('newMemberRole').value;
       if (!name || !account) return;
       var members = getMembers();
@@ -1021,6 +1023,7 @@
       saveMembers(members);
       document.getElementById('newMemberName').value = '';
       document.getElementById('newMemberAccount').value = '';
+      document.getElementById('newMemberPassword').value = '';
       renderMemberList();
     }
     function deleteMember(idx) {
