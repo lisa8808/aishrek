@@ -11,13 +11,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-page: #080D1A;
+      --bg-panel: rgba(13,18,37,0.86);
+      --bg-card: rgba(18,27,48,0.82);
+      --border-soft: rgba(148,163,184,0.12);
+      --border-active: rgba(37,99,235,0.48);
+      --text-main: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --primary: #2563EB;
+      --primary-soft: rgba(37,99,235,0.14);
+      --accent: #38BDF8;
+      --shadow-card: 0 18px 50px rgba(0,0,0,0.32);
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 13px;
-      background: #0A0E1B;
+      background:
+        radial-gradient(circle at 18% -10%, rgba(37,99,235,0.18), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(56,189,248,0.12), transparent 30%),
+        linear-gradient(180deg, #080D1A 0%, #0A0E1B 58%, #070B14 100%);
       height: 100vh;
-      color: #E5E7EB;
+      color: var(--text-main);
       overflow: hidden;
     }
 
@@ -27,14 +44,15 @@
       align-items: center;
       justify-content: space-between;
       padding: 10px 20px;
-      background: #0D1225;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(8,13,26,0.78);
+      border-bottom: 1px solid var(--border-soft);
+      backdrop-filter: blur(18px);
       height: 48px;
     }
     .header-title {
       font-size: 14px;
       font-weight: 600;
-      color: #E5E7EB;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -43,21 +61,22 @@
     .header-btn {
       padding: 5px 12px;
       background: transparent;
-      border: 1px solid #2563EB;
-      border-radius: 6px;
-      color: #2563EB;
+      border: 1px solid rgba(37,99,235,0.42);
+      border-radius: 9px;
+      color: #BFDBFE;
       font-size: 11px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .header-btn:hover { background: rgba(37,99,235,0.1); color: #3B82F6; }
+    .header-btn:hover { background: var(--primary-soft); color: #DBEAFE; }
 
     /* ===== Three-column Layout ===== */
     .main-container {
       display: grid;
       grid-template-columns: 15% 70% 15%;
-      gap: 0;
+      gap: 10px;
+      padding: 10px;
       height: calc(100vh - 48px);
     }
 
@@ -66,29 +85,33 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.18);
     }
     .panel-left, .panel-right {
-      background: #0D1225;
-      border-right: 1px solid rgba(255,255,255,0.04);
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border-soft);
     }
     .panel-right {
       border-right: none;
-      border-left: 1px solid rgba(255,255,255,0.04);
+      border-left: 1px solid var(--border-soft);
     }
     .panel-section-title {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #9CA3AF;
+      color: var(--text-secondary);
       padding: 14px 16px 6px;
     }
 
     /* ===== Left: Upload ===== */
     .upload-area {
       margin: 0 12px 10px;
-      border: 1.5px dashed rgba(55,65,81,0.6);
-      border-radius: 10px;
+      border: 1.5px dashed rgba(148,163,184,0.22);
+      border-radius: 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -96,13 +119,13 @@
       cursor: pointer;
       transition: all 0.2s;
       padding: 20px 12px;
-      background: #0D1225;
+      background: rgba(8,13,26,0.55);
     }
-    .upload-area:hover { border-color: #2563EB; background: rgba(37,99,235,0.04); }
-    .upload-area.dragover { border-color: #2563EB; background: rgba(37,99,235,0.08); }
+    .upload-area:hover { border-color: var(--border-active); background: var(--primary-soft); }
+    .upload-area.dragover { border-color: var(--border-active); background: rgba(37,99,235,0.2); }
     .upload-icon { font-size: 24px; margin-bottom: 6px; opacity: 0.6; }
-    .upload-text { font-size: 12px; margin-bottom: 3px; color: #9CA3AF; }
-    .upload-hint { font-size: 10px; color: #6B7280; }
+    .upload-text { font-size: 12px; margin-bottom: 3px; color: var(--text-secondary); }
+    .upload-hint { font-size: 10px; color: var(--text-muted); }
     #fileInput { display: none; }
     .loading { display: none; text-align: center; padding: 10px; }
     .loading.show { display: block; }
@@ -132,20 +155,20 @@
       transition: background 0.15s;
       margin-bottom: 1px;
     }
-    .file-item:hover { background: rgba(255,255,255,0.03); }
-    .file-item.active { background: rgba(37,99,235,0.1); }
+    .file-item:hover { background: rgba(148,163,184,0.06); }
+    .file-item.active { background: var(--primary-soft); box-shadow: inset 0 0 0 1px rgba(37,99,235,0.18); }
     .file-item-icon { font-size: 16px; flex-shrink: 0; }
     .file-item-info { flex: 1; min-width: 0; }
     .file-item-name {
       font-size: 12px;
-      color: #E5E7EB;
+      color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .file-item-meta {
       font-size: 10px;
-      color: #6B7280;
+      color: var(--text-muted);
       margin-top: 1px;
     }
     .file-item-delete {
@@ -172,10 +195,15 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      background: #0A0E1B;
+      background: radial-gradient(circle at center, rgba(37,99,235,0.1), rgba(8,13,26,0.96));
       position: relative;
       overflow: hidden;
       min-height: 0;
+    }
+    .preview-area:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      background: #080D1A;
     }
     #preview-canvas {
       flex: 1;
@@ -206,38 +234,27 @@
     }
     .preview-btn {
       padding: 5px 12px;
-      background: rgba(18,24,43,0.9);
-      border: 1px solid rgba(55,65,81,0.5);
-      border-radius: 6px;
-      color: #E5E7EB;
+      background: rgba(18,27,48,0.82);
+      border: 1px solid var(--border-soft);
+      border-radius: 9px;
+      color: var(--text-main);
       font-size: 11px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
       backdrop-filter: blur(8px);
     }
-    .preview-btn:hover { background: rgba(37,99,235,0.15); border-color: rgba(37,99,235,0.4); }
-    .preview-btn.active { background: rgba(37,99,235,0.2); border-color: #2563EB; color: #2563EB; }
+    .preview-btn:hover { background: rgba(37,99,235,0.18); border-color: var(--border-active); }
+    .preview-btn.active { background: rgba(37,99,235,0.24); border-color: var(--primary); color: #BFDBFE; }
 
     /* ===== Middle: Chat ===== */
     .chat-panel {
-      height: 260px;
-      min-height: 180px;
+      height: 360px;
+      min-height: 300px;
       display: flex;
       flex-direction: column;
-      background: #0D1225;
-      border-top: 1px solid rgba(255,255,255,0.04);
-    }
-    .chat-header {
-      padding: 8px 14px;
-      background: rgba(37,99,235,0.06);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-size: 11px;
-      font-weight: 600;
-      color: #E5E7EB;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: linear-gradient(180deg, rgba(18,27,48,0.94), rgba(8,13,26,0.98));
+      border-top: 1px solid var(--border-soft);
     }
     .chat-messages {
       flex: 1;
@@ -257,45 +274,45 @@
     }
     .chat-message.user {
       align-self: flex-end;
-      background: rgba(37,99,235,0.2);
+      background: linear-gradient(135deg, rgba(37,99,235,0.34), rgba(29,78,216,0.24));
       border-bottom-right-radius: 3px;
-      color: #E5E7EB;
+      color: var(--text-main);
     }
     .chat-message.assistant {
       align-self: flex-start;
       background: transparent;
       border-bottom-left-radius: 3px;
-      color: #9CA3AF;
+      color: var(--text-secondary);
     }
     .chat-input-area {
       display: flex;
       gap: 8px;
       padding: 8px 14px;
-      border-top: 1px solid rgba(255,255,255,0.04);
+      border-top: 1px solid var(--border-soft);
     }
     .chat-input {
       flex: 1;
-      background: #0A0E1B;
-      border: 1px solid rgba(55,65,81,0.5);
-      border-radius: 8px;
-      padding: 7px 12px;
-      color: #E5E7EB;
+      background: rgba(8,13,26,0.78);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--text-main);
       font-size: 12px;
       font-family: inherit;
     }
-    .chat-input:focus { outline: none; border-color: #2563EB; }
-    .chat-input::placeholder { color: #6B7280; }
+    .chat-input:focus { outline: none; border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .chat-input::placeholder { color: var(--text-muted); }
     .chat-send {
       width: 32px; height: 32px;
-      background: #2563EB;
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: #fff;
       font-size: 14px;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .chat-send:hover { background: #3B82F6; }
+    .chat-send:hover { filter: brightness(1.08); }
     .chat-send:disabled { opacity: 0.3; cursor: not-allowed; }
     .chat-empty {
       flex: 1;
@@ -310,6 +327,86 @@
       background: rgba(37,99,235,0.1);
       transition: box-shadow 0.3s, background 0.3s;
     }
+    .skill-selector {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top left, rgba(37,99,235,0.16), transparent 42%), rgba(8,13,26,0.72);
+    }
+    .skill-selector-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-main);
+      margin-bottom: 9px;
+      letter-spacing: 0.04em;
+    }
+    .skill-selector-title span {
+      color: #6B7280;
+      font-size: 10px;
+      letter-spacing: 0;
+    }
+    .skill-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .skill-btn {
+      border: 1px solid var(--border-soft);
+      background: rgba(18,27,48,0.84);
+      color: var(--text-secondary);
+      border-radius: 12px;
+      padding: 9px 9px;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      min-height: 58px;
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-btn::after {
+      content: '';
+      position: absolute;
+      inset: auto 8px 7px 8px;
+      height: 2px;
+      border-radius: 999px;
+      background: transparent;
+      transition: background 0.15s;
+    }
+    .skill-btn:hover {
+      color: #E5E7EB;
+      border-color: var(--border-active);
+      background: rgba(37,99,235,0.12);
+      transform: translateY(-1px);
+    }
+    .skill-btn.active {
+      color: var(--text-main);
+      border-color: rgba(96,165,250,0.64);
+      background: linear-gradient(180deg, rgba(37,99,235,0.26), rgba(37,99,235,0.1));
+      box-shadow: 0 10px 24px rgba(37,99,235,0.16), inset 0 0 0 1px rgba(37,99,235,0.14);
+    }
+    .skill-btn.active::after { background: var(--primary); }
+    .skill-btn-name {
+      display: block;
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .skill-btn-en {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 9px;
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 900px) {
+      .skill-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
 
     /* ===== Right: Version History ===== */
     .version-list {
@@ -319,14 +416,14 @@
     }
     .version-item {
       padding: 8px 10px;
-      background: #12182B;
-      border-radius: 8px;
+      background: rgba(18,27,48,0.7);
+      border-radius: 10px;
       margin-bottom: 3px;
       cursor: pointer;
       transition: background 0.15s;
       position: relative;
     }
-    .version-item:hover { background: rgba(37,99,235,0.06); }
+    .version-item:hover { background: rgba(37,99,235,0.08); }
     .version-item.generating { }
     .version-item.failed { }
     .version-item.done { }
@@ -459,9 +556,9 @@
       <div class="upload-area" id="uploadArea">
         <div class="upload-icon">⚙️</div>
         <div class="upload-text">拖入或点击上传</div>
-        <div class="upload-hint">支持 stl、step、dxf、dwg、图片、pdf格式</div>
+        <div class="upload-hint">支持 STL/PLY/OBJ/3MF、STEP/IGES、PRT/ASM、DRW/DWG/DXF、PDF、图片工程图，最大 10MB</div>
       </div>
-      <input type="file" id="fileInput" accept=".stl,.step,.stp,application/sla,model/stl,model/step">
+      <input type="file" id="fileInput" accept=".stl,.ply,.obj,.3mf,.step,.stp,.iges,.igs,.prt,.asm,.drw,.dwg,.dxf,.pdf,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,application/sla,model/stl,model/step,image/*,application/pdf">
       <div class="loading" id="loading"><div class="spinner"></div></div>
 
       <div class="panel-section-title">上传历史</div>
@@ -488,12 +585,16 @@
           <button class="preview-btn" onclick="exportSTL()">导出 STL</button>
           <button class="preview-btn" onclick="exportSTEP()">导出 STEP</button>
           <button class="preview-btn" onclick="exportDrawing()">导出平面图</button>
+          <button class="preview-btn" id="btn-fullscreen" onclick="togglePreviewFullscreen()">全屏</button>
         </div>
       </div>
 
       <!-- Chat -->
       <div class="chat-panel" id="chatPanel">
-        <div class="chat-header">AI设计助手</div>
+        <div class="skill-selector" id="skillSelector">
+          <div class="skill-selector-title">选择创作方向，进行对话创作</div>
+          <div class="skill-buttons" id="skillButtons"></div>
+        </div>
         <div class="chat-messages" id="chatMessages">
           <div class="chat-empty">上传模型后，用自然语言描述修改需求</div>
         </div>
@@ -625,6 +726,10 @@
 
       // Resize handler
       window.addEventListener('resize', onWindowResize);
+      document.addEventListener('fullscreenchange', function() {
+        updateFullscreenButton();
+        setTimeout(onWindowResize, 50);
+      });
 
       // Start animation loop
       animate();
@@ -641,6 +746,25 @@
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+    }
+
+    window.togglePreviewFullscreen = function() {
+      const previewArea = document.getElementById('previewArea');
+      if (!previewArea) return;
+      if (document.fullscreenElement === previewArea) {
+        document.exitFullscreen();
+      } else {
+        previewArea.requestFullscreen().catch(function(err) {
+          alert('无法进入全屏：' + err.message);
+        });
+      }
+    };
+
+    function updateFullscreenButton() {
+      const btn = document.getElementById('btn-fullscreen');
+      const previewArea = document.getElementById('previewArea');
+      if (!btn || !previewArea) return;
+      btn.textContent = document.fullscreenElement === previewArea ? '退出全屏' : '全屏';
     }
 
     function animate() {
@@ -754,9 +878,102 @@
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
     const chatMessages = document.getElementById('chatMessages');
+    const skillButtons = document.getElementById('skillButtons');
     
     let chatHistory = [];
     let hasModel = false;
+    let activeSkillId = 'ai-designer';
+
+    const SKILL_PROFILES = [
+      {
+        id: 'ai-designer',
+        name: '全域设计',
+        enName: 'AI-DESIGNER',
+        intro: '负责跨能力域任务理解、拆解、编排和结果汇总。\n\n适用范围：\n- 根据用户目标自动识别所需创作方向。\n- 编排中性设计、原生联动、结构仿真、动力学分析等能力链路。\n- 将复杂设计任务拆解为可执行步骤。\n- 汇总模型修改、图纸处理、仿真分析和验证报告结果。\n- 支持多轮对话中的任务续写、能力切换和阶段性总结。',
+        abilities: '负责跨能力域任务理解、拆解、编排和结果汇总。适用范围：根据用户目标自动识别所需创作方向；编排中性设计、原生联动、结构仿真、动力学分析等能力链路；将复杂设计任务拆解为可执行步骤；汇总模型修改、图纸处理、仿真分析和验证报告结果；支持多轮对话中的任务续写、能力切换和阶段性总结。',
+        input: '用户设计目标、三维模型、二维图纸、工程约束、仿真条件、运动工况、历史对话上下文',
+        output: '任务拆解方案、能力调用路径、阶段性设计结果、验证摘要、综合创作报告'
+      },
+      {
+        id: 'ai-stl-stp-dwg',
+        name: '中性设计',
+        enName: 'AI-STL-STP-DWG',
+        intro: '负责中性格式、网格、工程图和可视化相关任务。\n\n适用范围：\n- STL 网格分析、修复、局部修改和 Web 可视化转换。\n- STEP/STP B-Rep 分析、转换、修改和导出。\n- DWG/DXF 二维图纸解析、轮廓提取和三维重建。\n- PDF、扫描图、图片工程图的预处理、矢量化和建模辅助。\n- SVG/DXF/DWG 工程图输出。\n- GLB/glTF Web 预览资产、SVG/PDF/PNG 二维预览资产和可审计预览报告输出。',
+        abilities: '负责中性格式、网格、工程图和可视化相关任务。适用范围：STL 网格分析、修复、局部修改和 Web 可视化转换；STEP/STP B-Rep 分析、转换、修改和导出；DWG/DXF 二维图纸解析、轮廓提取和三维重建；PDF、扫描图、图片工程图的预处理、矢量化和建模辅助；SVG/DXF/DWG 工程图输出；GLB/glTF Web 预览资产、SVG/PDF/PNG 二维预览资产和可审计预览报告输出。',
+        input: 'STL、STEP/STP、DWG/DXF、PDF、扫描图纸、图片类工程图',
+        output: 'STL、STEP/STP、DWG/DXF、SVG、GLB/glTF、PDF、PNG、可审计预览报告'
+      },
+      {
+        id: 'ai-prt-asm-drw',
+        name: '原生联动',
+        enName: 'AI-PRT-ASM-DRW',
+        intro: '负责原生零件、装配、工程图联动能力。\n\n适用范围：\n- 原生零件参数和尺寸读取。\n- 原生零件参数化修改。\n- 装配体再生和关系检查。\n- 工程图再生、保存和显示尺寸验证。\n- 干涉检查。\n- 工程图尺寸链检查。\n- 原生模型变更后的领域级验证报告。',
+        abilities: '负责原生零件、装配、工程图联动能力。适用范围：原生零件参数和尺寸读取；原生零件参数化修改；装配体再生和关系检查；工程图再生、保存和显示尺寸验证；干涉检查；工程图尺寸链检查；原生模型变更后的领域级验证报告。',
+        input: 'PRT（零件）、ASM（装配）、DRW（工程图），Creo/SolidWorks/NX 原生 CAD 文件',
+        output: '编辑后 PRT/ASM/DRW、干涉检查报告、尺寸链检查报告、模型变更验证报告'
+      },
+      {
+        id: 'ai-simulate',
+        name: '结构仿真',
+        enName: 'AI-SIMULATE',
+        intro: '负责结构仿真能力。\n\n适用范围：\n- 材料、约束、载荷、接触、网格、分析工况定义。\n- 静力、模态、屈曲、疲劳、热等结构分析的能力建模。\n- 应力、位移、安全系数等结果输出。\n- 结构仿真报告和验证标准。',
+        abilities: '负责结构仿真能力。适用范围：材料、约束、载荷、接触、网格、分析工况定义；静力、模态、屈曲、疲劳、热等结构分析的能力建模；应力、位移、安全系数等结果输出；结构仿真报告和验证标准。',
+        input: 'PRT/ASM 三维模型、材料参数、载荷/约束、网格参数、分析工况配置文件',
+        output: '应力、位移、安全系数等仿真结果数据、结构仿真报告'
+      },
+      {
+        id: 'ai-mechanism',
+        name: '动力学分析',
+        enName: 'AI-MECHANISM',
+        intro: '负责运动学和动力学分析能力。\n\n适用范围：\n- 刚体、连接、约束、驱动、运动范围定义。\n- 位置、速度、加速度、力、扭矩等运动结果输出。\n- 碰撞、干涉、轨迹、曲线图和动画输出。\n- 运动仿真报告和验证标准。',
+        abilities: '负责运动学和动力学分析能力。适用范围：刚体、连接、约束、驱动、运动范围定义；位置、速度、加速度、力、扭矩等运动结果输出；碰撞、干涉、轨迹、曲线图和动画输出；运动仿真报告和验证标准。',
+        input: 'ASM 装配模型、运动约束、驱动参数、负载配置、运动工况文件',
+        output: '运动参数数据、碰撞/干涉报告、运动轨迹、曲线图、仿真动画、运动仿真报告'
+      }
+    ];
+
+    function getActiveSkill() {
+      return SKILL_PROFILES.find(function(skill) { return skill.id === activeSkillId; }) || SKILL_PROFILES[0];
+    }
+
+    function formatSkillIntro(skill) {
+      return skill.intro;
+    }
+
+    function showActiveSkillIntro() {
+      chatMessages.innerHTML = '';
+      addChatMessage('assistant', formatSkillIntro(getActiveSkill()), true);
+    }
+
+    function renderSkillSelector() {
+      if (!skillButtons) return;
+      skillButtons.innerHTML = '';
+      SKILL_PROFILES.forEach(function(skill) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'skill-btn' + (skill.id === activeSkillId ? ' active' : '');
+        btn.innerHTML = '<span class="skill-btn-name">' + escapeHtml(skill.name) + '</span>'
+          + '<span class="skill-btn-en">' + escapeHtml(skill.enName) + '</span>';
+        btn.setAttribute('data-skill-id', skill.id);
+        btn.addEventListener('click', function() { selectSkill(skill.id, true); });
+        skillButtons.appendChild(btn);
+      });
+    }
+
+    function selectSkill(skillId, shouldAnnounce) {
+      activeSkillId = skillId;
+      if (skillButtons) {
+        skillButtons.querySelectorAll('.skill-btn').forEach(function(btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-skill-id') === activeSkillId);
+        });
+      }
+      if (shouldAnnounce) {
+        showActiveSkillIntro();
+      }
+    }
+
+    renderSkillSelector();
+    showActiveSkillIntro();
     
     // Enable chat when model is loaded
     window.enableChat = function() {
@@ -778,45 +995,8 @@
         };
       }
       chatInput.placeholder = "用机械术语描述修改：通孔Φ8、倒角C2、放大到120mm...";
-      chatMessages.innerHTML = '';
-      addChatMessage('assistant', '⚙️ 机械设计专家已就绪。\n\n请用自然语言描述零件修改需求，或点击快捷操作：', true);
-      
-      // Add quick action buttons
-      showQuickActions();
+      showActiveSkillIntro();
     };
-    
-    function showQuickActions() {
-      const quickActions = [
-        { text: '🔘 通孔Φ8', action: () => executeCommand('打一个直径8mm的通孔') },
-        { text: '◻️ 方孔10', action: () => executeCommand('挖10mm方孔') },
-        { text: '📐 倒角C2', action: () => executeCommand('倒角2mm') },
-        { text: '⭕ 圆角R3', action: () => executeCommand('圆角3mm') },
-        { text: '⬆️ 凸台Φ20', action: () => executeCommand('加凸台直径20高5') },
-        { text: '📏 放大20%', action: () => executeCommand('放大20%') },
-        { text: '🔄 旋转90°', action: () => executeCommand('旋转90度') },
-        { text: '🪞 镜像', action: () => executeCommand('左右镜像') },
-        { text: '🔲 线框', action: () => executeCommand('线框') },
-        { text: '📐 分析', action: () => executeCommand('分析') },
-        { text: '↩️ 撤销', action: () => executeCommand('撤销') },
-        { text: '❓ 帮助', action: () => executeCommand('帮助') },
-      ];
-      
-      const msgDiv = chatMessages.querySelector('.chat-message:last-child');
-      if (!msgDiv) return;
-      
-      const btnContainer = document.createElement('div');
-      btnContainer.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;';
-      
-      quickActions.forEach(btn => {
-        const button = document.createElement('button');
-        button.textContent = btn.text;
-        button.style.cssText = 'padding:6px 10px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.25);border-radius:6px;color:#2563EB;font-size:11px;cursor:pointer;';
-        button.onclick = btn.action;
-        btnContainer.appendChild(button);
-      });
-      
-      msgDiv.appendChild(btnContainer);
-    }
     
     function executeCommand(text) {
       // Add user message
@@ -905,8 +1085,14 @@
         model: 'anthropic/claude-opus-4.6'
       };
       
+      const activeSkill = getActiveSkill();
       const systemPrompt = `你是AI机械制造设计专家。用户正在对三维零件模型进行参数化修改。
 所有尺寸单位为 mm，保留2位小数。
+
+当前选中技能：${activeSkill.name} ${activeSkill.enName}
+技能能力画像：${activeSkill.abilities}
+支持输入格式：${activeSkill.input}
+标准输出格式：${activeSkill.output}
 
 你需要将用户的自然语言机械设计指令解析为可执行的操作。
 
@@ -1262,7 +1448,7 @@
       let actions = [];
       const numMatch = text.match(/(\d+(?:\.\d+)?)/);
       const num = numMatch ? parseFloat(numMatch[1]) : null;
-      
+
       // ====== UNDO / RESET ======
       if (/撤销|撤回|undo|回退/.test(text)) {
         return { message: undo(), applied: true };
@@ -1292,6 +1478,12 @@
         };
       }
       
+      // ====== AI-SIMULATE (front-end engineering estimate) ======
+      if (/仿真|静力|载荷|约束|材料|应力|位移|安全系数|simulate|simulation|fea|有限元/i.test(text)) {
+        var sim = runStructureSimulationEstimate(text);
+        return { message: sim.message, applied: true };
+      }
+
       // ====== ANALYSIS ======
       if (/分析|analyze|几何分析/.test(text)) {
         autoAnalyzeGeometry();
@@ -1958,6 +2150,146 @@
         avgRadius: avgR > 1 ? avgR.toFixed(2) : null
       };
     }
+
+    // ========== AI-SIMULATE: simplified front-end structure estimate ==========
+    let latestSimulationReport = null;
+
+    const SIM_MATERIALS = {
+      '钢': { name: '钢', density: 7.85, elasticModulus: 210000, yieldStrength: 250 },
+      '碳钢': { name: '碳钢', density: 7.85, elasticModulus: 210000, yieldStrength: 250 },
+      '不锈钢': { name: '不锈钢', density: 7.9, elasticModulus: 193000, yieldStrength: 215 },
+      '铝': { name: '铝合金', density: 2.70, elasticModulus: 69000, yieldStrength: 276 },
+      '铝合金': { name: '铝合金', density: 2.70, elasticModulus: 69000, yieldStrength: 276 },
+      '钛': { name: '钛合金', density: 4.43, elasticModulus: 110000, yieldStrength: 880 },
+      '钛合金': { name: '钛合金', density: 4.43, elasticModulus: 110000, yieldStrength: 880 },
+      'abs': { name: 'ABS', density: 1.04, elasticModulus: 2200, yieldStrength: 40 },
+      'ABS': { name: 'ABS', density: 1.04, elasticModulus: 2200, yieldStrength: 40 },
+      '尼龙': { name: '尼龙', density: 1.15, elasticModulus: 2800, yieldStrength: 70 }
+    };
+
+    function parseSimulationInput(text) {
+      var material = SIM_MATERIALS['铝合金'];
+      Object.keys(SIM_MATERIALS).some(function(key) {
+        if (text.indexOf(key) !== -1) {
+          material = SIM_MATERIALS[key];
+          return true;
+        }
+        return false;
+      });
+
+      var loadN = 1000;
+      var loadMatch = text.match(/(\d+(?:\.\d+)?)\s*(kN|kn|KN|千牛|N|牛)/);
+      if (loadMatch) {
+        loadN = parseFloat(loadMatch[1]);
+        if (/kN|kn|KN|千牛/.test(loadMatch[2])) loadN *= 1000;
+      }
+
+      var constraint = '固定左侧';
+      if (/底部|下方|底面/.test(text)) constraint = '固定底部';
+      else if (/右侧|右端/.test(text)) constraint = '固定右侧';
+      else if (/一端|端部/.test(text)) constraint = '固定一端';
+      else if (/左侧|左端/.test(text)) constraint = '固定左侧';
+
+      var loadPosition = '顶部施加载荷';
+      if (/底部|下方|底面/.test(text) && !/固定底部/.test(text)) loadPosition = '底部施加载荷';
+      else if (/右侧|右端/.test(text)) loadPosition = '右侧施加载荷';
+      else if (/左侧|左端/.test(text) && !/固定左侧/.test(text)) loadPosition = '左侧施加载荷';
+      else if (/顶部|上方|顶面/.test(text)) loadPosition = '顶部施加载荷';
+
+      return { material: material, loadN: loadN, constraint: constraint, loadPosition: loadPosition, caseType: '静力分析' };
+    }
+
+    function runStructureSimulationEstimate(text) {
+      var info = analyzeGeometry(currentMesh);
+      if (!info) return { message: '无法生成结构仿真报告：当前模型几何信息不可用。' };
+
+      var cfg = parseSimulationInput(text);
+      var dims = info.dims.slice().sort(function(a, b) { return b - a; });
+      var length = Math.max(dims[0], 1);
+      var width = Math.max(dims[1], 1);
+      var thickness = Math.max(dims[2], 1);
+      var area = Math.max(width * thickness, 1);
+      var inertia = Math.max(width * Math.pow(thickness, 3) / 12, 1);
+      var volume = parseFloat(info.volume) || (length * width * thickness);
+      var massG = volume * cfg.material.density / 1000;
+
+      // N/mm² equals MPa. This is a first-order estimate, not FEA.
+      var avgStress = cfg.loadN / area;
+      var bendingStress = cfg.loadN * length * (thickness / 2) / inertia;
+      var stress = Math.max(avgStress, bendingStress);
+      var displacement = cfg.loadN * Math.pow(length, 3) / (3 * cfg.material.elasticModulus * inertia);
+      var safetyFactor = cfg.material.yieldStrength / Math.max(stress, 0.001);
+      var risk = '安全';
+      var color = 0x2563eb;
+      if (safetyFactor < 1.5) { risk = '危险'; color = 0xef4444; }
+      else if (safetyFactor < 3) { risk = '注意'; color = 0xf59e0b; }
+      else { risk = '安全'; color = 0x2563eb; }
+
+      if (currentMesh && currentMesh.material) {
+        currentMesh.material.color.setHex(color);
+        currentMesh.material.needsUpdate = true;
+      }
+
+      var report = '结构仿真报告（experimental）\n\n'
+        + '【工况配置】\n'
+        + '材料：' + cfg.material.name + '\n'
+        + '弹性模量：' + (cfg.material.elasticModulus / 1000).toFixed(1) + ' GPa\n'
+        + '屈服强度：' + cfg.material.yieldStrength.toFixed(0) + ' MPa\n'
+        + '约束：' + cfg.constraint + '\n'
+        + '载荷：' + cfg.loadN.toFixed(0) + ' N（' + cfg.loadPosition + '）\n'
+        + '工况：' + cfg.caseType + '\n\n'
+        + '【几何估算】\n'
+        + '外形尺寸：' + info.dimX + ' × ' + info.dimY + ' × ' + info.dimZ + ' mm\n'
+        + '等效承载截面积：' + area.toFixed(2) + ' mm²\n'
+        + '估算体积：' + volume.toFixed(2) + ' mm³\n'
+        + '估算质量：' + massG.toFixed(2) + ' g\n\n'
+        + '【结果估算】\n'
+        + '平均拉压应力：' + avgStress.toFixed(2) + ' MPa\n'
+        + '弯曲控制应力：' + bendingStress.toFixed(2) + ' MPa\n'
+        + '控制应力：' + stress.toFixed(2) + ' MPa\n'
+        + '估算位移：' + displacement.toFixed(4) + ' mm\n'
+        + '安全系数：' + safetyFactor.toFixed(2) + '\n'
+        + '风险等级：' + risk + '\n\n'
+        + '【说明】\n'
+        + '当前为基于包围盒、等效截面和简化悬臂/拉压模型的前端工程估算，不等同于有限元 FEA 求解。报告状态：experimental。';
+
+      latestSimulationReport = {
+        title: '结构仿真报告',
+        status: 'experimental',
+        createdAt: new Date().toLocaleString(),
+        content: report
+      };
+
+      addVersionRecord('结构仿真估算', risk + ' / 安全系数 ' + safetyFactor.toFixed(2), { simulationReport: latestSimulationReport });
+
+      return { message: report };
+    }
+
+    function openSimulationPdf(report) {
+      if (!report) {
+        alert('该版本没有可查看的仿真报告');
+        return;
+      }
+
+      var win = window.open('', '_blank');
+      if (!win) {
+        alert('浏览器阻止了 PDF 预览窗口，请允许弹窗后重试。');
+        return;
+      }
+
+      var safeTitle = escapeHtml(report.title || '结构仿真报告');
+      var safeTime = escapeHtml(report.createdAt || '');
+      var safeStatus = escapeHtml(report.status || 'experimental');
+      var safeContent = escapeHtml(report.content || '');
+      win.document.write('<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>' + safeTitle + '</title>'
+        + '<style>'
+        + '@page{size:A4;margin:16mm;}*{box-sizing:border-box;}body{margin:0;background:#e5e7eb;color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;} .toolbar{position:sticky;top:0;padding:12px 20px;background:#0f172a;color:#fff;display:flex;justify-content:space-between;align-items:center;box-shadow:0 8px 20px rgba(15,23,42,.18);} .toolbar button{border:0;border-radius:8px;background:#2563eb;color:#fff;padding:8px 14px;cursor:pointer;font-weight:600;} .page{width:210mm;min-height:297mm;margin:18px auto;background:#fff;padding:18mm;box-shadow:0 20px 60px rgba(15,23,42,.18);} h1{margin:0 0 8px;font-size:22px;} .meta{display:flex;gap:10px;margin-bottom:18px;color:#64748b;font-size:12px;} .badge{display:inline-block;border:1px solid #f59e0b;color:#92400e;background:#fffbeb;border-radius:999px;padding:2px 8px;} pre{white-space:pre-wrap;font-family:inherit;line-height:1.72;font-size:13px;margin:0;} .footer{margin-top:24px;border-top:1px solid #e2e8f0;padding-top:10px;color:#64748b;font-size:11px;} @media print{body{background:#fff}.toolbar{display:none}.page{width:auto;min-height:auto;margin:0;padding:0;box-shadow:none}}'
+        + '</style></head><body>'
+        + '<div class="toolbar"><div>PDF 预览 · ' + safeTitle + '</div><button onclick="window.print()">打印 / 另存为 PDF</button></div>'
+        + '<main class="page"><h1>' + safeTitle + '</h1><div class="meta"><span>生成时间：' + safeTime + '</span><span class="badge">' + safeStatus + '</span></div><pre>' + safeContent + '</pre><div class="footer">GLB/glTF 仅用于浏览器展示；当前仿真为前端工程估算，不作为制造级验证结论。</div></main>'
+        + '</body></html>');
+      win.document.close();
+    }
     
     // Auto-analyze and post to chat after file load
     function autoAnalyzeGeometry() {
@@ -2019,6 +2351,8 @@
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const loading = document.getElementById('loading');
+    const VISUAL_PREVIEW_EXTENSIONS = ['stl', 'ply', 'obj', '3mf', 'step', 'stp', 'iges', 'igs', 'prt', 'asm', 'drw', 'dwg', 'dxf', 'pdf', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'tif', 'tiff'];
+    const BROWSER_PREVIEW_EXTENSIONS = ['stl', 'step', 'stp'];
     
     uploadArea.addEventListener('click', () => fileInput.click());
     uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
@@ -2050,13 +2384,50 @@
     // Current active file id
     let activeFileId = null;
 
+    function getFileExtension(fileName) {
+      var parts = fileName.toLowerCase().split('.');
+      return parts.length > 1 ? parts.pop() : '';
+    }
+
+    function isSupportedVisualPreviewFile(fileName) {
+      return VISUAL_PREVIEW_EXTENSIONS.indexOf(getFileExtension(fileName)) !== -1;
+    }
+
+    function isBrowserPreviewFile(fileName) {
+      return BROWSER_PREVIEW_EXTENSIONS.indexOf(getFileExtension(fileName)) !== -1;
+    }
+
+    function showPendingPreview(file) {
+      if (currentMesh) {
+        scene.remove(currentMesh);
+        if (currentMesh.geometry) currentMesh.geometry.dispose();
+        if (currentMesh.material) currentMesh.material.dispose();
+        currentMesh = null;
+      }
+      document.getElementById('previewControls').style.display = 'none';
+      hasModel = false;
+      chatInput.disabled = true;
+      chatSend.disabled = true;
+      var ph = document.getElementById('previewPlaceholder');
+      if (ph) {
+        ph.style.display = 'block';
+        ph.innerHTML = '<div class="preview-placeholder-icon">📄</div>'
+          + '<div class="preview-placeholder-text" style="font-size:20px;color:rgba(255,255,255,0.6);margin-bottom:12px;">已导入：' + escapeHtml(file.name) + '</div>'
+          + '<div class="preview-placeholder-hint" style="max-width:460px;line-height:1.8;font-size:13px;color:rgba(255,255,255,0.35);">该格式属于 AI-Visual-Preview 支持输入，可生成 Web 预览资产、元数据与转换/质量报告。当前浏览器端仅直接解析 STL、STEP/STP，其余格式需转换服务后刷新预览。</div>';
+      }
+      chatMessages.innerHTML = '';
+      addChatMessage('assistant', '文件已导入上传历史：' + file.name + '\n\n该格式需要 AI-Visual-Preview 转换服务生成 GLB/glTF、SVG、PDF 或 PNG 预览资产后再进行浏览器预览。');
+    }
+
     function handleSTLFile(file) {
       var name = file.name.toLowerCase();
-      var isSTL = name.endsWith('.stl');
-      var isSTEP = name.endsWith('.step') || name.endsWith('.stp');
+      var ext = getFileExtension(name);
+      var isSTL = ext === 'stl';
+      var isSTEP = ext === 'step' || ext === 'stp';
+      var canPreviewInBrowser = isBrowserPreviewFile(name);
       
-      if (!isSTL && !isSTEP) {
-        alert('请上传 .stl / .step / .stp 格式文件');
+      if (!isSupportedVisualPreviewFile(name)) {
+        alert('请上传 AI-Visual-Preview 支持的文件：STL/PLY/OBJ/3MF、STEP/IGES、PRT/ASM、DRW/DWG/DXF、PDF、图片工程图');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
@@ -2077,12 +2448,17 @@
           saveFileToHistory(file, newFileId);
           autoAnalyzeGeometry();
         });
-      } else {
+      } else if (isSTL) {
         loadSTL(file);
         loading.classList.remove('show');
         clearVersionHistory();
         saveFileToHistory(file, newFileId);
         setTimeout(autoAnalyzeGeometry, 200);
+      } else if (!canPreviewInBrowser) {
+        loading.classList.remove('show');
+        clearVersionHistory();
+        saveFileToHistory(file, newFileId);
+        showPendingPreview(file);
       }
     }
     
@@ -2266,6 +2642,27 @@
       const bytes = new Uint8Array(binary.length);
       for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       
+      var ext = getFileExtension(entry.name);
+      var file = new File([bytes], entry.name);
+      if (ext === 'step' || ext === 'stp') {
+        loading.classList.add('show');
+        loadSTEP(file, function() {
+          loading.classList.remove('show');
+          activeFileId = id;
+          renderFileHistory();
+          switchVersionHistory(id);
+        });
+        return;
+      }
+
+      if (ext !== 'stl') {
+        activeFileId = id;
+        showPendingPreview(file);
+        renderFileHistory();
+        switchVersionHistory(id);
+        return;
+      }
+
       // Parse STL
       const loader = new THREE.STLLoader();
       try {
@@ -2388,7 +2785,7 @@
     // Current file's in-memory version records (mirrors localStorage)
     let currentVersionRecords = [];
 
-    function addVersionRecord(action, detail) {
+    function addVersionRecord(action, detail, extra) {
       versionCounter++;
       var vid = versionCounter;
       var actionText = action + (detail ? '：' + detail : '');
@@ -2400,7 +2797,8 @@
         status: 'generating',
         time: Date.now(),
         geoB64: null,
-        pos: null, rot: null, scl: null, color: null
+        pos: null, rot: null, scl: null, color: null,
+        simulationReport: extra && extra.simulationReport ? extra.simulationReport : null
       };
 
       currentVersionRecords.push(record);
@@ -2428,6 +2826,8 @@
           if (el) updateVersionStatus(el, 'failed');
         }
       }, 3000);
+
+      return record;
     }
 
     function updateVersionStatus(el, status) {
@@ -2472,6 +2872,7 @@
         + '<span class="version-more" data-vid="' + record.id + '">···'
         + '<div class="version-menu">'
         + '<div class="version-menu-item" data-action="view-cmd">查看设计指令</div>'
+        + (record.simulationReport ? '<div class="version-menu-item" data-action="view-sim-pdf">查看 PDF 报告</div>' : '')
         + '<div class="version-menu-item" data-action="export-stl">导出 STL</div>'
         + '<div class="version-menu-item" data-action="export-step">导出 STEP</div>'
         + '<div class="version-menu-item danger" data-action="delete">删除</div>'
@@ -2539,6 +2940,7 @@
           var vid = parseInt(moreBtn.dataset.vid);
           var action = this.dataset.action;
           if (action === 'view-cmd') viewVersionCommand(vid);
+          else if (action === 'view-sim-pdf') viewSimulationPdfReport(vid);
           else if (action === 'export-stl') exportVersionAsSTL(vid);
           else if (action === 'export-step') exportVersionAsSTEP(vid);
           else if (action === 'delete') deleteVersion(vid);
@@ -2772,6 +3174,15 @@
       var rec = currentVersionRecords.find(function(r) { return r.id === vid; });
       if (!rec) return;
       addChatMessage('assistant', '📋 v' + vid + ' 设计指令：\n' + rec.action);
+    }
+
+    function viewSimulationPdfReport(vid) {
+      var rec = currentVersionRecords.find(function(r) { return r.id === vid; });
+      if (!rec || !rec.simulationReport) {
+        alert('该版本没有可查看的仿真报告');
+        return;
+      }
+      openSimulationPdf(rec.simulationReport);
     }
 
     // Export a specific version snapshot as STL

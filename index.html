@@ -9,13 +9,33 @@
   <title>AI-3D设计大师 - 项目列表</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-page: #080D1A;
+      --bg-panel: rgba(17,24,43,0.88);
+      --bg-card: rgba(18,27,48,0.82);
+      --bg-card-strong: #121A30;
+      --border-soft: rgba(148,163,184,0.12);
+      --border-active: rgba(37,99,235,0.48);
+      --text-main: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --primary: #2563EB;
+      --primary-soft: rgba(37,99,235,0.14);
+      --accent: #38BDF8;
+      --warning: #F59E0B;
+      --radius-card: 16px;
+      --shadow-card: 0 18px 50px rgba(0,0,0,0.32);
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       font-weight: 400;
-      background: #0A0E1B;
+      background:
+        radial-gradient(circle at 18% -10%, rgba(37,99,235,0.18), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(56,189,248,0.12), transparent 30%),
+        linear-gradient(180deg, #080D1A 0%, #0A0E1B 58%, #070B14 100%);
       min-height: 100vh;
-      color: #FFFFFF;
+      color: var(--text-main);
     }
 
     /* ===== Header ===== */
@@ -24,18 +44,22 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 32px;
-      background: #0D1225;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      background: rgba(8,13,26,0.78);
+      border-bottom: 1px solid var(--border-soft);
+      backdrop-filter: blur(18px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
     .header-title {
       font-size: 18px;
       font-weight: 700;
-      color: #FFFFFF;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .header-title .hl { color: #00D4FF; }
+    .header-title .hl { color: var(--accent); }
     .header-right { display: flex; align-items: center; gap: 12px; position: relative; }
     .user-area {
       display: flex;
@@ -46,25 +70,25 @@
     }
     .user-avatar {
       width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, #1A213A, #12182B);
-      border: 1.5px solid rgba(0,212,255,0.3);
+      background: linear-gradient(135deg, rgba(37,99,235,0.28), rgba(18,24,43,0.96));
+      border: 1.5px solid rgba(56,189,248,0.28);
       display: flex; align-items: center; justify-content: center;
       font-size: 16px; transition: all 0.2s;
-      color: #00D4FF;
+      color: var(--accent);
     }
-    .user-avatar:hover { border-color: #00D4FF; box-shadow: 0 0 12px rgba(0,212,255,0.15); }
-    .user-name { font-size: 11px; color: #8892B0; font-weight: 400; }
+    .user-avatar:hover { border-color: var(--accent); box-shadow: 0 0 18px rgba(56,189,248,0.16); }
+    .user-name { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
 
     /* Personal center dropdown */
     .user-dropdown {
       display: none; position: fixed;
       top: 56px; right: 32px;
       width: 220px;
-      background: #12182B;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
+      background: rgba(18,24,43,0.96);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
       z-index: 1000;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      box-shadow: var(--shadow-card);
       overflow: hidden;
     }
     .user-dropdown.show { display: block; }
@@ -76,7 +100,7 @@
     .user-dropdown-avatar {
       width: 48px; height: 48px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #00d9ff, #0099cc);
+      background: linear-gradient(135deg, #2563EB, #38BDF8);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -113,17 +137,17 @@
       margin: 2px 0;
       transition: all 0.15s;
     }
-    .user-dropdown-item.clickable:hover { background: rgba(0,200,255,0.08); color: #00C8FF; }
+    .user-dropdown-item.clickable:hover { background: var(--primary-soft); color: #BFDBFE; }
 
     /* Service cards */
     .svc-modal {
-      background: #111321;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 28px 32px;
-      width: 920px;
-      max-width: 95vw;
-      max-height: 90vh;
+      background: linear-gradient(180deg, rgba(17,24,43,0.98), rgba(10,14,27,0.98));
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      padding: 22px 26px;
+      width: 1240px;
+      max-width: 98vw;
+      max-height: 96vh;
       overflow-y: auto;
       position: relative;
     }
@@ -138,36 +162,37 @@
     .svc-close:hover { color: #fff; }
     .svc-title {
       display: flex; align-items: center; gap: 10px;
-      margin-bottom: 24px;
+      margin-bottom: 18px;
     }
     .svc-title-icon {
       width: 36px; height: 36px;
-      background: #1D233D; border-radius: 8px;
+      background: var(--primary-soft); border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
     }
     .svc-title-text {
-      font-size: 16px; font-weight: 500; color: #FFFFFF;
+      font-size: 16px; font-weight: 600; color: var(--text-main);
     }
     .svc-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 14px;
     }
     .svc-card {
-      background: #171A2F;
-      border: 1px solid #2B3050;
-      border-radius: 10px;
-      padding: 20px;
+      background: linear-gradient(180deg, rgba(18,27,48,0.9), rgba(15,22,40,0.9));
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
       display: flex; flex-direction: column;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.18);
     }
     .svc-card-header {
       display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .svc-card-icon {
       width: 36px; height: 36px;
-      background: #1D233D; border-radius: 8px;
+      background: var(--primary-soft); border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
     }
@@ -175,31 +200,35 @@
       padding: 3px 12px; border-radius: 16px;
       font-size: 12px; font-weight: 500;
     }
-    .svc-card-tag.active { background: #F59E0B; color: #FFFFFF; }
-    .svc-card-tag.inactive { background: #2B3050; color: #FFFFFF; }
-    .svc-card-title { font-size: 15px; font-weight: 600; color: #FFFFFF; margin-bottom: 6px; }
-    .svc-card-desc { font-size: 13px; color: #B0B8D4; line-height: 1.5; flex: 1; }
-    .svc-card-bottom { margin-top: 18px; text-align: center; }
+    .svc-card-tag.active { background: rgba(245,158,11,0.16); color: #FBBF24; border: 1px solid rgba(245,158,11,0.25); }
+    .svc-card-tag.inactive { background: rgba(100,116,139,0.14); color: #CBD5E1; border: 1px solid rgba(148,163,184,0.14); }
+    .svc-card-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+    .svc-card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.42; flex: 1; }
+    .svc-card-desc p { margin: 0 0 6px; color: #CBD5E1; }
+    .svc-card-desc strong { display: block; color: var(--text-main); font-weight: 600; margin-bottom: 3px; }
+    .svc-card-desc ul { margin: 0; padding-left: 17px; }
+    .svc-card-desc li { margin-bottom: 2px; }
+    .svc-card-bottom { margin-top: 10px; text-align: center; }
     .svc-card-link {
       width: 100%; padding: 8px 0;
-      background: transparent; border: 1px solid #3A4065;
-      border-radius: 6px; color: #00E0FF; font-size: 14px;
+      background: var(--primary-soft); border: 1px solid rgba(37,99,235,0.38);
+      border-radius: 8px; color: #BFDBFE; font-size: 14px;
       cursor: pointer; transition: all 0.2s; display: block;
     }
-    .svc-card-link:hover { background: rgba(0,224,255,0.08); border-color: #00E0FF; }
+    .svc-card-link:hover { background: rgba(37,99,235,0.22); border-color: rgba(96,165,250,0.65); }
     .svc-card-btn {
       width: 100%; padding: 8px 0;
-      background: transparent; border: 1px solid #00E0FF;
-      border-radius: 6px; color: #FFFFFF; font-size: 14px;
+      background: transparent; border: 1px solid rgba(37,99,235,0.5);
+      border-radius: 8px; color: var(--text-main); font-size: 14px;
       cursor: pointer; transition: all 0.2s;
     }
-    .svc-card-btn:hover { background: rgba(0,224,255,0.08); }
+    .svc-card-btn:hover { background: var(--primary-soft); border-color: rgba(96,165,250,0.65); }
     .user-dropdown-tag {
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 10px;
       background: rgba(0,217,255,0.15);
-      color: #00d9ff;
+      color: var(--accent);
     }
     .user-dropdown-tag.gold { background: rgba(255,200,0,0.15); color: #ffc800; }
     .user-dropdown-avatar-sm {
@@ -210,9 +239,9 @@
       justify-content: center;
       font-size: 12px;
     }
-    .user-dropdown-avatar-sm.a { background: #00d9ff; }
+    .user-dropdown-avatar-sm.a { background: #2563EB; }
     .user-dropdown-avatar-sm.b { background: #ff6b6b; }
-    .user-dropdown-avatar-sm.c { background: #00ff88; color: #000; }
+    .user-dropdown-avatar-sm.c { background: #38BDF8; color: #07111F; }
 
     /* Container */
     .container {
@@ -232,19 +261,19 @@
     }
     .top-bar-left {
       font-size: 14px;
-      color: #8892B0;
+      color: var(--text-secondary);
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .top-bar-left span { color: #00D4FF; font-weight: 600; }
+    .top-bar-left span { color: var(--accent); font-weight: 700; }
     .top-bar-right { display: flex; align-items: center; gap: 10px; }
     .sort-select {
       padding: 8px 14px;
-      background: #12182B;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 8px;
-      color: #8892B0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      color: var(--text-secondary);
       font-size: 12px;
       font-family: inherit;
       outline: none;
@@ -252,32 +281,32 @@
     }
     .search-input {
       padding: 8px 14px;
-      background: #12182B;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 8px;
-      color: #FFFFFF;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      color: var(--text-main);
       font-size: 13px;
       font-family: inherit;
       width: 200px;
       outline: none;
       transition: border-color 0.2s;
     }
-    .search-input:focus { border-color: rgba(0,212,255,0.4); }
-    .search-input::placeholder { color: #557; }
+    .search-input:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .search-input::placeholder { color: var(--text-muted); }
 
     /* New project button */
     .btn-new {
       display: flex; align-items: center; gap: 6px;
       padding: 9px 20px;
-      background: linear-gradient(135deg, #00D4FF 0%, #0088CC 100%);
-      border: none; border-radius: 8px;
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      border: none; border-radius: 10px;
       color: #fff; font-size: 13px; font-weight: 600;
       cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(0,212,255,0.2);
+      box-shadow: 0 10px 24px rgba(37,99,235,0.24);
     }
     .btn-new:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(0,212,255,0.3);
+      box-shadow: 0 14px 30px rgba(37,99,235,0.32);
     }
 
     /* Card grid */
@@ -289,42 +318,39 @@
 
     /* Project card */
     .card {
-      background: #12182B;
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(18,27,48,0.9), rgba(12,18,32,0.94));
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
       cursor: pointer;
       transition: all 0.25s;
       overflow: hidden;
       position: relative;
     }
     .card:hover {
-      border-color: rgba(0,212,255,0.25);
+      border-color: var(--border-active);
       transform: translateY(-3px);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      box-shadow: var(--shadow-card);
     }
 
     .card-preview {
       height: 140px;
-      background: #0F1320;
+      background: radial-gradient(circle at center, rgba(37,99,235,0.12), rgba(8,13,26,0.92));
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
       gap: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border-soft);
     }
-    .card-preview-icon { font-size: 32px; color: #4a5568; animation: gear-spin 8s linear infinite; }
+    .card-preview-icon { font-size: 32px; color: rgba(148,163,184,0.42); animation: gear-spin 8s linear infinite; }
     @keyframes gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .card-preview-text { font-size: 12px; color: #8892B0; }
 
-    .card-body {
-      padding: 14px 16px;
-      background: #1A213A;
-    }
+    .card-body { padding: 14px 16px; background: rgba(15,23,42,0.72); }
     .card-name {
       font-size: 14px;
       font-weight: 500;
-      color: #FFFFFF;
+      color: var(--text-main);
       margin-bottom: 8px;
       white-space: nowrap;
       overflow: hidden;
@@ -335,7 +361,7 @@
       align-items: center;
       justify-content: space-between;
       font-size: 11px;
-      color: #8892B0;
+      color: var(--text-secondary);
     }
     .card-meta-left {
       display: flex;
@@ -387,30 +413,31 @@
     }
     .modal-overlay.show { display: flex; }
     .modal {
-      background: #1A1D35;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(18,24,43,0.98), rgba(10,14,27,0.98));
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      box-shadow: var(--shadow-card);
       padding: 24px 28px;
       width: 400px; max-width: 90vw;
     }
-    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #00D4FF; }
-    .modal-label { font-size: 12px; color: #8892B0; margin-bottom: 6px; }
+    .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #BFDBFE; }
+    .modal-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
     .modal-input {
       width: 100%; padding: 9px 12px;
-      background: #0F1225; border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 8px; color: #FFFFFF; font-size: 13px;
+      background: rgba(8,13,26,0.8); border: 1px solid var(--border-soft);
+      border-radius: 10px; color: var(--text-main); font-size: 13px;
       outline: none; margin-bottom: 10px;
       transition: border-color 0.2s; font-family: inherit;
     }
-    .modal-input:focus { border-color: rgba(0,212,255,0.4); }
+    .modal-input:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .modal-textarea {
       width: 100%; padding: 9px 12px;
-      background: #0F1225; border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 8px; color: #FFFFFF; font-size: 13px;
+      background: rgba(8,13,26,0.8); border: 1px solid var(--border-soft);
+      border-radius: 10px; color: var(--text-main); font-size: 13px;
       outline: none; margin-bottom: 16px; resize: vertical;
       min-height: 60px; transition: border-color 0.2s; font-family: inherit;
     }
-    .modal-textarea:focus { border-color: rgba(0,212,255,0.4); }
+    .modal-textarea:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
     .modal-btn {
       padding: 7px 18px; border-radius: 8px; border: none;
@@ -422,37 +449,37 @@
     }
     .modal-btn-cancel:hover { background: rgba(255,255,255,0.08); color: #FFFFFF; }
     .modal-btn-confirm {
-      background: linear-gradient(135deg, #00D4FF 0%, #0088CC 100%);
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
       color: #fff; font-weight: 600;
     }
-    .modal-btn-confirm:hover { box-shadow: 0 4px 12px rgba(0,212,255,0.3); }
+    .modal-btn-confirm:hover { box-shadow: 0 8px 18px rgba(37,99,235,0.28); }
 
     /* Rename inline */
     .card-name-input {
       width: 100%; padding: 2px 6px;
-      background: #0F1225; border: 1px solid #00D4FF;
+      background: #0F1225; border: 1px solid #2563EB;
       border-radius: 6px; color: #FFFFFF; font-size: 14px;
       font-weight: 600; outline: none; font-family: inherit;
     }
 
     /* Service auth modal */
-    .auth-modal { background: #0F1225; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 28px 36px; width: 640px; max-width: 95vw; position: relative; }
+    .auth-modal { background: linear-gradient(180deg, rgba(18,24,43,0.98), rgba(10,14,27,0.98)); border: 1px solid var(--border-soft); border-radius: 16px; padding: 28px 36px; width: 640px; max-width: 95vw; position: relative; box-shadow: var(--shadow-card); }
     .auth-close { position: absolute; top: 18px; right: 24px; width: 24px; height: 24px; background: none; border: none; color: #8892B0; font-size: 20px; cursor: pointer; }
     .auth-close:hover { color: #fff; }
     .auth-title { text-align: center; font-size: 18px; font-weight: 700; color: #FFFFFF; margin-bottom: 10px; }
     .auth-guide { text-align: center; font-size: 13px; color: #8892B0; margin-bottom: 28px; line-height: 1.6; }
     .auth-steps { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 28px; }
-    .auth-card { background: #12182B; border: 1px solid #2B3050; border-radius: 12px; padding: 24px 20px; width: 220px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .auth-card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 24px 20px; width: 220px; display: flex; flex-direction: column; align-items: center; text-align: center; }
     .auth-card-icon { font-size: 28px; margin-bottom: 10px; }
     .auth-card-title { font-size: 15px; font-weight: 600; color: #FFFFFF; margin-bottom: 8px; }
     .auth-card-desc { font-size: 12px; color: #8892B0; margin-bottom: 16px; line-height: 1.5; flex: 1; }
-    .auth-card-btn { width: 100%; padding: 9px 0; background: #1D233D; border: 1px solid #2B3050; border-radius: 8px; color: #FFFFFF; font-size: 13px; cursor: pointer; transition: all 0.15s; }
-    .auth-card-btn:hover { border-color: #00D4FF; color: #00D4FF; }
-    .auth-arrow { font-size: 24px; color: #00D4FF; }
+    .auth-card-btn { width: 100%; padding: 9px 0; background: var(--primary-soft); border: 1px solid rgba(37,99,235,0.32); border-radius: 10px; color: #FFFFFF; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .auth-card-btn:hover { border-color: rgba(96,165,250,0.65); color: #BFDBFE; }
+    .auth-arrow { font-size: 24px; color: var(--accent); }
     .auth-bottom { text-align: center; }
     .auth-bottom-btn { padding: 8px 40px; background: transparent; border: 1px solid #3A4065; border-radius: 8px; color: #8892B0; font-size: 13px; cursor: pointer; transition: all 0.15s; }
     .auth-bottom-btn:hover { border-color: #8892B0; color: #FFFFFF; }
-    .auth-fingerprint { font-size: 12px; color: #00D4FF; background: rgba(0,212,255,0.08); border-radius: 6px; padding: 8px 12px; margin: 10px 0; word-break: break-all; display: none; }
+    .auth-fingerprint { font-size: 12px; color: #BFDBFE; background: rgba(37,99,235,0.12); border-radius: 6px; padding: 8px 12px; margin: 10px 0; word-break: break-all; display: none; }
   </style>
 </head>
 <body>
@@ -589,46 +616,107 @@
           </div>
           <div class="svc-card-title">基础模版</div>
           <div class="svc-card-desc">整合3D（stl，step）渲染、设计工具、智能文生能力，为轻量化设计场景提供底层技术支撑。</div>
-          <div class="svc-card-bottom"><button class="svc-card-link">查看权益</button></div>
+          <div class="svc-card-bottom"><button class="svc-card-link">权益续费</button></div>
         </div>
         <!-- Card 2 -->
         <div class="svc-card">
           <div class="svc-card-header">
-            <div class="svc-card-icon">🤖</div>
+            <div class="svc-card-icon">🧩</div>
             <span class="svc-card-tag active">已启用</span>
           </div>
-          <div class="svc-card-title">3D双向建模分析</div>
-          <div class="svc-card-desc">支持3D（stl，step）模型双向迭代编辑，可智能校验模型参数，完成精细化建模与优化分析。</div>
-          <div class="svc-card-bottom"><button class="svc-card-link">查看权益</button></div>
+          <div class="svc-card-title">中性设计</div>
+          <div class="svc-card-desc">
+            <p>负责中性格式、网格、工程图和可视化相关任务。</p>
+            <strong>适用范围：</strong>
+            <ul>
+              <li>STL 网格分析、修复、局部修改和 Web 可视化转换。</li>
+              <li>STEP/STP B-Rep 分析、转换、修改和导出。</li>
+              <li>DWG/DXF 二维图纸解析、轮廓提取和三维重建。</li>
+              <li>PDF、扫描图、图片工程图的预处理、矢量化和建模辅助。</li>
+              <li>SVG/DXF/DWG 工程图输出。</li>
+              <li>GLB/glTF Web 预览资产、SVG/PDF/PNG 二维预览资产和可审计预览报告输出。</li>
+            </ul>
+          </div>
+          <div class="svc-card-bottom"><button class="svc-card-link">权益续费</button></div>
         </div>
         <!-- Card 3 -->
-        <div class="svc-card">
-          <div class="svc-card-header">
-            <div class="svc-card-icon">📐</div>
-            <span class="svc-card-tag inactive">未购买</span>
-          </div>
-          <div class="svc-card-title">2D转3D建模</div>
-          <div class="svc-card-desc">智能识别二维图纸、草图数据（dxf、dwg、图片、pdf 等），自动生成高精度可编辑三维立体模型。</div>
-          <div class="svc-card-bottom"><button class="svc-card-btn" onclick="openAuthModal()">开通服务</button></div>
-        </div>
-        <!-- Card 4 -->
         <div class="svc-card">
           <div class="svc-card-header">
             <div class="svc-card-icon">🔗</div>
             <span class="svc-card-tag inactive">未购买</span>
           </div>
-          <div class="svc-card-title">3D转2D工程图</div>
-          <div class="svc-card-desc">依托三维模型文件，一键生成合规二维工程图纸，适配生产施工与归档场景。</div>
+          <div class="svc-card-title">原生联动</div>
+          <div class="svc-card-desc">
+            <p>负责原生零件、装配、工程图联动能力。</p>
+            <strong>适用范围：</strong>
+            <ul>
+              <li>原生零件参数和尺寸读取。</li>
+              <li>原生零件参数化修改。</li>
+              <li>装配体再生和关系检查。</li>
+              <li>工程图再生、保存和显示尺寸验证。</li>
+              <li>干涉检查。</li>
+              <li>工程图尺寸链检查。</li>
+              <li>原生模型变更后的领域级验证报告。</li>
+            </ul>
+          </div>
+          <div class="svc-card-bottom"><button class="svc-card-btn" onclick="openAuthModal()">开通服务</button></div>
+        </div>
+        <!-- Card 4 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">📊</div>
+            <span class="svc-card-tag inactive">未购买</span>
+          </div>
+          <div class="svc-card-title">结构仿真</div>
+          <div class="svc-card-desc">
+            <p>负责结构仿真能力。</p>
+            <strong>适用范围：</strong>
+            <ul>
+              <li>材料、约束、载荷、接触、网格、分析工况定义。</li>
+              <li>静力、模态、屈曲、疲劳、热等结构分析的能力建模。</li>
+              <li>应力、位移、安全系数等结果输出。</li>
+              <li>结构仿真报告和验证标准。</li>
+            </ul>
+          </div>
           <div class="svc-card-bottom"><button class="svc-card-btn" onclick="openAuthModal()">开通服务</button></div>
         </div>
         <!-- Card 5 -->
         <div class="svc-card">
           <div class="svc-card-header">
-            <div class="svc-card-icon">✨</div>
+            <div class="svc-card-icon">⚙️</div>
             <span class="svc-card-tag inactive">未购买</span>
           </div>
-          <div class="svc-card-title">力学运动仿真</div>
-          <div class="svc-card-desc">模拟结构力学性能与设备运动状态，排查设计隐患，提供优化数据支撑。</div>
+          <div class="svc-card-title">动力学分析</div>
+          <div class="svc-card-desc">
+            <p>负责运动学和动力学分析能力。</p>
+            <strong>适用范围：</strong>
+            <ul>
+              <li>刚体、连接、约束、驱动、运动范围定义。</li>
+              <li>位置、速度、加速度、力、扭矩等运动结果输出。</li>
+              <li>碰撞、干涉、轨迹、曲线图和动画输出。</li>
+              <li>运动仿真报告和验证标准。</li>
+            </ul>
+          </div>
+          <div class="svc-card-bottom"><button class="svc-card-btn" onclick="openAuthModal()">开通服务</button></div>
+        </div>
+        <!-- Card 6 -->
+        <div class="svc-card">
+          <div class="svc-card-header">
+            <div class="svc-card-icon">🧠</div>
+            <span class="svc-card-tag inactive">未购买</span>
+          </div>
+          <div class="svc-card-title">全域设计</div>
+          <div class="svc-card-desc">
+            <p>负责跨能力域任务理解、拆解、编排和结果汇总。</p>
+            <strong>适用范围：</strong>
+            <ul>
+              <li>根据用户目标自动识别所需创作方向。</li>
+              <li>编排中性设计、原生联动、结构仿真、动力学分析等能力链路。</li>
+              <li>将复杂设计任务拆解为可执行步骤。</li>
+              <li>汇总模型修改、图纸处理、仿真分析和验证报告结果。</li>
+              <li>支持多轮对话中的任务续写、能力切换和阶段性总结。</li>
+            </ul>
+          </div>
           <div class="svc-card-bottom"><button class="svc-card-btn" onclick="openAuthModal()">开通服务</button></div>
         </div>
       </div>
