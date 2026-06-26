@@ -6,7 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>AI-3D设计大师</title>
+  <title>AI-Shrek</title>
+  <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -71,13 +72,16 @@
     }
     .header-btn:hover { background: var(--primary-soft); color: #DBEAFE; }
 
-    /* ===== Three-column Layout ===== */
+    /* ===== Two-column Layout (default, right panel hidden) ===== */
     .main-container {
       display: grid;
-      grid-template-columns: 15% 70% 15%;
+      grid-template-columns: 18% 1fr;
       gap: 10px;
       padding: 10px;
       height: calc(100vh - 48px);
+    }
+    .main-container.with-history {
+      grid-template-columns: 18% 60% 22%;
     }
 
     /* ===== Panels ===== */
@@ -106,6 +110,48 @@
       color: var(--text-secondary);
       padding: 14px 16px 6px;
     }
+
+    /* ===== Left: Tab Bar ===== */
+    .tab-bar {
+      display: flex;
+      margin: 8px 12px 12px;
+      border-radius: 10px;
+      background: rgba(8,13,26,0.55);
+      border: 1px solid var(--border-soft);
+      overflow: hidden;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 6px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .tab-btn:hover { color: var(--text-secondary); background: rgba(37,99,235,0.06); }
+    .tab-btn.active {
+      color: var(--text-main);
+      background: rgba(37,99,235,0.18);
+      font-weight: 600;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 999px;
+    }
+    .tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .tab-content.active { display: flex; }
 
     /* ===== Left: Upload ===== */
     .upload-area {
@@ -190,7 +236,7 @@
     }
 
     /* ===== Middle: Preview ===== */
-    .panel-center { display: flex; flex-direction: column; }
+    .panel-center { display: flex; flex-direction: column; align-self: stretch; }
     .preview-area {
       flex: 1;
       display: flex;
@@ -198,7 +244,6 @@
       background: #080D1A;
       position: relative;
       overflow: hidden;
-      min-height: 0;
     }
     .preview-area::before {
       content: '';
@@ -209,6 +254,7 @@
         radial-gradient(circle at 70% 60%, rgba(56,189,248,0.04) 0%, transparent 50%);
       animation: bgShift 8s ease-in-out infinite alternate;
       z-index: 0;
+      pointer-events: none;
     }
     @keyframes bgShift {
       0% { opacity: 0.6; transform: scale(1); }
@@ -222,7 +268,6 @@
     #preview-canvas {
       flex: 1;
       width: 100%;
-      height: 100%;
       display: block;
     }
     .preview-placeholder {
@@ -248,33 +293,110 @@
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 6px;
+      flex-wrap: nowrap;
+      gap: 4px;
       z-index: 10;
+      white-space: nowrap;
     }
     .preview-btn {
-      padding: 5px 12px;
+      padding: 4px 8px;
       background: rgba(18,27,48,0.82);
       border: 1px solid var(--border-soft);
-      border-radius: 9px;
+      border-radius: 7px;
       color: var(--text-main);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
       backdrop-filter: blur(8px);
+      flex-shrink: 0;
     }
     .preview-btn:hover { background: rgba(37,99,235,0.18); border-color: var(--border-active); }
     .preview-btn.active { background: rgba(37,99,235,0.24); border-color: var(--primary); color: #BFDBFE; }
 
+    /* ===== Coordinate Info Panel ===== */
+    .coord-info-panel {
+      position: absolute;
+      top: 52px;
+      right: 12px;
+      z-index: 20;
+      background: rgba(8,13,26,0.88);
+      border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      min-width: 240px;
+      backdrop-filter: blur(12px);
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 11px;
+      color: #e2e8f0;
+      line-height: 1.75;
+      pointer-events: auto;
+    }
+    .coord-info-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(56,189,248,0.15);
+    }
+    .coord-info-panel .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .coord-info-panel .info-label {
+      color: #94a3b8;
+    }
+    .coord-info-panel .info-value {
+      color: #f8fafc;
+      text-align: right;
+    }
+    .coord-info-panel .info-value.red { color: #ef4444; }
+    .coord-info-panel .info-value.green { color: #22c55e; }
+    .coord-info-panel .info-value.blue { color: #3b82f6; }
+    .coord-info-panel .info-value.cyan { color: #22d3ee; }
+
     /* ===== Middle: Chat ===== */
     .chat-panel {
-      height: 360px;
-      min-height: 300px;
+      height: 280px;
+      min-height: 240px;
       display: flex;
       flex-direction: column;
       background: linear-gradient(180deg, rgba(18,27,48,0.94), rgba(8,13,26,0.98));
       border-top: 1px solid var(--border-soft);
+      position: relative;
+      overflow: hidden;
     }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border-soft);
+      flex-shrink: 0;
+    }
+    .chat-header-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .history-toggle-btn {
+      padding: 4px 10px;
+      background: rgba(37,99,235,0.12);
+      border: 1px solid rgba(37,99,235,0.32);
+      border-radius: 7px;
+      color: #BFDBFE;
+      font-size: 10px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-toggle-btn:hover { background: rgba(37,99,235,0.22); border-color: var(--border-active); }
+    .history-toggle-btn.active { background: var(--primary-soft); border-color: var(--primary); color: var(--text-main); }
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -305,22 +427,51 @@
     }
     .chat-input-area {
       display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: 10px 12px;
+      margin: 0 14px 14px;
+      background: rgba(8,13,26,0.78);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      min-height: 90px;
+    }
+    .chat-input-row {
+      display: flex;
       gap: 8px;
-      padding: 8px 14px;
-      border-top: 1px solid var(--border-soft);
+      align-items: center;
+    }
+    .chat-tools-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding-bottom: 8px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--border-soft);
     }
     .chat-input {
       flex: 1;
-      background: rgba(8,13,26,0.78);
-      border: 1px solid var(--border-soft);
-      border-radius: 10px;
-      padding: 8px 12px;
+      background: transparent;
+      border: none;
+      padding: 4px 0;
       color: var(--text-main);
       font-size: 12px;
       font-family: inherit;
     }
-    .chat-input:focus { outline: none; border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .chat-input:focus { outline: none; }
     .chat-input::placeholder { color: var(--text-muted); }
+    .chat-mode-select {
+      background: rgba(8,13,26,0.78);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 6px 10px;
+      color: var(--text-main);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .chat-mode-select:focus { outline: none; border-color: var(--border-active); }
     .chat-send {
       width: 32px; height: 32px;
       background: linear-gradient(135deg, #2563EB, #1D4ED8);
@@ -368,8 +519,8 @@
     }
     .skill-buttons {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
     }
     .skill-btn {
       border: 1px solid var(--border-soft);
@@ -423,9 +574,7 @@
       line-height: 1.15;
       letter-spacing: 0.01em;
     }
-    @media (max-width: 900px) {
-      .skill-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
+    @media (max-width: 900px) { }
 
     /* ===== Right: Version History ===== */
     .version-list {
@@ -550,9 +699,58 @@
     .version-menu-item.danger { color: #EF4444; }
     .version-menu-item.danger:hover { background: rgba(239,68,68,0.1); }
 
+    /* ===== Right: History Overlay ===== */
+    .history-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(13,18,37,0.98);
+      backdrop-filter: blur(12px);
+      z-index: 20;
+      flex-direction: column;
+      border-radius: 16px;
+    }
+    .history-overlay.show { display: flex; }
+    .history-overlay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-soft);
+      flex-shrink: 0;
+    }
+    .history-overlay-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .history-overlay-close {
+      padding: 3px 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .history-overlay-close:hover { color: var(--text-secondary); border-color: rgba(148,163,184,0.35); }
+    .history-overlay .version-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+    }
+
     /* ===== Responsive ===== */
-    @media (max-width: 1100px) { .main-container { grid-template-columns: 18% 64% 18%; } }
-    @media (max-width: 800px) { .main-container { grid-template-columns: 1fr; } .panel-left, .panel-right { display: none; } }
+    @media (max-width: 1100px) {
+      .main-container { grid-template-columns: 20% 1fr; }
+      .main-container.with-history { grid-template-columns: 20% 80%; }
+      .panel-right { display: none !important; }
+    }
+    @media (max-width: 800px) { .main-container { grid-template-columns: 1fr; } .panel-left, .panel-right { display: none; } .chat-panel { height: 260px; } }
   </style>
 </head>
 <body>
@@ -560,7 +758,7 @@
   <header class="header">
     <div class="header-title">
       <a href="index.html" class="header-btn" style="text-decoration:none;margin-right:8px;padding:6px 10px;">← 返回</a>
-      ⚙️ AI-3D设计大师
+      ⚙️ AI-Shrek
       <span id="projectNameDisplay" style="font-size:13px;color:rgba(255,255,255,0.45);margin-left:10px;font-weight:400;"></span>
     </div>
     <div class="header-actions">
@@ -569,20 +767,40 @@
   </header>
 
   <div class="main-container">
-    <!-- Left Panel: Upload + File History -->
+    <!-- Left Panel: Tab-based Upload + File History -->
     <div class="panel panel-left">
-      <div class="panel-section-title">导入零件</div>
-      <div class="upload-area" id="uploadArea">
-        <div class="upload-icon">⚙️</div>
-        <div class="upload-text">拖入或点击上传</div>
-        <div class="upload-hint">支持 STL/PLY/OBJ/3MF、STEP/IGES、PRT/ASM、DRW/DWG/DXF、PDF、图片工程图，最大 10MB</div>
+      <div class="tab-bar" id="designTabBar">
+        <button class="tab-btn active" data-tab="zhongxing">通用建模</button>
+        <button class="tab-btn" data-tab="jingmi">原生精密</button>
+        <button class="tab-btn" data-tab="quanyu" style="display:none">全域设计</button>
       </div>
-      <input type="file" id="fileInput" accept=".stl,.ply,.obj,.3mf,.step,.stp,.iges,.igs,.prt,.asm,.drw,.dwg,.dxf,.pdf,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,application/sla,model/stl,model/step,image/*,application/pdf">
-      <div class="loading" id="loading"><div class="spinner"></div></div>
-
-      <div class="panel-section-title">上传历史</div>
-      <div class="file-list" id="fileList">
-        <div class="file-list-empty" id="fileListEmpty">暂无上传记录</div>
+      <div class="panel-section-title">导入零件</div>
+      <div class="tab-content active" id="tab-zhongxing">
+        <div class="upload-area" id="uploadArea0" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">⚙️</div>
+          <div class="upload-text">拖入或点击上传</div>
+          <div class="upload-hint">支持 STL/PLY/OBJ/3MF、STEP/IGES、PDF、图片工程图，最大 10MB</div>
+        </div>
+        <div class="loading" id="loading0"><div class="spinner"></div></div>
+        <div class="file-list" id="fileList0"><div class="file-list-empty">暂无上传记录</div></div>
+      </div>
+      <div class="tab-content" id="tab-jingmi">
+        <div class="upload-area" id="uploadArea1" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">🔧</div>
+          <div class="upload-text">拖入或点击上传</div>
+          <div class="upload-hint">支持 PRT/ASM、DRW/DWG/DXF、PDF、图片工程图，最大 10MB</div>
+        </div>
+        <div class="loading" id="loading1"><div class="spinner"></div></div>
+        <div class="file-list" id="fileList1"><div class="file-list-empty">暂无上传记录</div></div>
+      </div>
+      <div class="tab-content" id="tab-quanyu">
+        <div class="upload-area" id="uploadArea2" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">🌐</div>
+          <div class="upload-text">拖入或点击上传</div>
+          <div class="upload-hint">支持全格式文件导入，自动识别和分配处理链路，最大 10MB</div>
+        </div>
+        <div class="loading" id="loading2"><div class="spinner"></div></div>
+        <div class="file-list" id="fileList2"><div class="file-list-empty">暂无上传记录</div></div>
       </div>
     </div>
 
@@ -598,39 +816,66 @@
         </div>
         <canvas id="preview-canvas"></canvas>
         <div class="preview-controls" id="previewControls" style="display:none">
-          <button class="preview-btn" id="btn-wireframe">线框</button>
+          <button class="preview-btn" onclick="setView('iso')">等轴测</button>
+          <button class="preview-btn" onclick="setView('front')">前视图</button>
+          <button class="preview-btn" onclick="setView('top')">俯视图</button>
+          <button class="preview-btn" onclick="setView('right')">右视图</button>
+          <span style="width:6px;display:inline-block"></span>
+          <button class="preview-btn" id="btn-dots" onclick="toggleDots()">标记</button>
           <button class="preview-btn" id="btn-original" onclick="toggleOriginal()">回到原稿</button>
-          <button class="preview-btn" onclick="exportSTL()">导出 STL</button>
-          <button class="preview-btn" onclick="exportSTEP()">导出 STEP</button>
-          <button class="preview-btn" onclick="exportDrawing()">导出平面图</button>
           <button class="preview-btn" id="btn-fullscreen" onclick="togglePreviewFullscreen()">全屏</button>
+        </div>
+        <div class="coord-info-panel" id="coordInfoPanel" style="display:none">
+          <div class="coord-info-title">📐 Coordinate Inspector</div>
+          <div id="coordInfoContent"></div>
         </div>
       </div>
 
-      <!-- Chat -->
       <div class="chat-panel" id="chatPanel">
-        <div class="skill-selector" id="skillSelector">
-          <div class="skill-selector-title">选择创作方向，进行对话创作</div>
-          <div class="skill-buttons" id="skillButtons"></div>
+        <div class="chat-header">
+          <span class="chat-header-title">创作对话</span>
+          <button class="history-toggle-btn" id="historyToggleBtn" onclick="toggleHistoryOverlay()" title="修改历史" style="padding:4px 6px;line-height:1;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
         </div>
         <div class="chat-messages" id="chatMessages">
-          <div class="chat-empty">上传模型后，用自然语言描述修改需求</div>
+          <div class="chat-empty">上传零件图后，自动解读参数</div>
         </div>
         <div class="chat-input-area">
-          <input type="text" class="chat-input" id="chatInput" placeholder="例如：放大20%、挖洞、变红色、旋转90度..." disabled>
-          <button class="chat-send" id="chatSend" disabled>➤</button>
+          <div class="chat-tools-row" id="chatToolsRow">
+            <button class="preview-btn" id="btn-export-drawing" onclick="exportDrawing()" style="font-size:10px;padding:3px 10px;">📐 导出平面图</button>
+            <button class="preview-btn" id="btn-sim-structure" onclick="triggerStructureSim()" style="font-size:10px;padding:3px 10px;">⚙️ 结构仿真</button>
+            <button class="preview-btn" id="btn-sim-mechanism" onclick="triggerMechanismSim()" style="font-size:10px;padding:3px 10px;">🔧 动力学仿真</button>
+          </div>
+          <div class="chat-input-row">
+            <select class="chat-mode-select" id="chatModeSelect">
+              <option value="plan">plan</option>
+              <option value="build">build</option>
+            </select>
+            <input type="text" class="chat-input" id="chatInput" placeholder="例如：放大20%、挖洞、变红色、旋转90度..." disabled>
+            <button class="chat-send" id="chatSend" disabled>➤</button>
+          </div>
+        </div>
+        <div class="history-overlay" id="historyOverlay">
+          <div class="history-overlay-header">
+            <span class="history-overlay-title">修改历史</span>
+            <button class="history-overlay-close" onclick="toggleHistoryOverlay()">✕ 关闭</button>
+          </div>
+          <div class="version-list" id="versionList">
+            <div class="version-list-empty" id="versionListEmpty">修改操作会自动记录在这里</div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Right Panel: Version History -->
-    <div class="panel panel-right">
+    <div class="panel panel-right" style="display:none">
       <div class="panel-section-title">修改历史</div>
-      <div class="version-list" id="versionList">
-        <div class="version-list-empty" id="versionListEmpty">修改操作会自动记录在这里</div>
+      <div class="version-list" id="versionListRight">
+        <div class="version-list-empty" id="versionListRightEmpty">修改操作会自动记录在这里</div>
       </div>
     </div>
   </div>
+
+  <input type="file" id="fileInput" accept=".stl,.ply,.obj,.3mf,.step,.stp,.iges,.igs,.prt,.asm,.drw,.dwg,.dxf,.pdf,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,application/sla,model/stl,model/step,image/*,application/pdf">
 
   <!-- Three.js via CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
@@ -642,11 +887,11 @@
 
   <!-- OCCT for STEP file import -->
   <script src="https://cdn.jsdelivr.net/npm/occt-import-js@0.0.23/dist/occt-import-js.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
     // Global Three.js variables
     let scene, camera, renderer, controls, currentMesh;
-    let isWireframe = false;
     let isInitialized = false;
     
     // Original file snapshot for "回到原稿"
@@ -659,6 +904,87 @@
     // Undo history stack: saves geometry + transform snapshots
     const undoStack = [];
     const MAX_UNDO = 20;
+
+    // Design tab state (zhongxing / jingmi / quanyu)
+    let activeDesignTab = 'zhongxing';
+    const DESIGN_TABS = ['zhongxing', 'jingmi', 'quanyu'];
+
+    function switchDesignTab(tabId) {
+      activeDesignTab = tabId;
+      document.querySelectorAll('#designTabBar .tab-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.panel-left .tab-content').forEach(function(tc) {
+        tc.classList.toggle('active', tc.id === 'tab-' + tabId);
+      });
+      // 导出平面图/结构仿真/动力学仿真在所有tab均显示
+      var disp = '';
+      var btnDrawing = document.getElementById('btn-export-drawing');
+      var btnSimSt = document.getElementById('btn-sim-structure');
+      var btnSimMech = document.getElementById('btn-sim-mechanism');
+      if (btnDrawing) btnDrawing.style.display = disp;
+      if (btnSimSt) btnSimSt.style.display = disp;
+      if (btnSimMech) btnSimMech.style.display = disp;
+
+      if (tabId === 'jingmi' && currentMesh && scene) {
+        scene.remove(currentMesh);
+        if (currentMesh.geometry) currentMesh.geometry.dispose();
+        if (currentMesh.material) currentMesh.material.dispose();
+        currentMesh = null;
+        cleanupRuntimeSnapshots();
+        clearDotMarkers && clearDotMarkers();
+      }
+
+      renderFileHistory();
+    }
+
+    document.getElementById('designTabBar').addEventListener('click', function(e) {
+      if (e.target.classList.contains('tab-btn') && e.target.dataset.tab) {
+        switchDesignTab(e.target.dataset.tab);
+      }
+    });
+
+    function showLicenseAlert() {
+      var existing = document.getElementById('licenseAlertOverlay');
+      if (existing) existing.remove();
+
+      var overlay = document.createElement('div');
+      overlay.id = 'licenseAlertOverlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+
+      overlay.innerHTML = '<div style="background:var(--bg-panel);border:1px solid var(--border-soft);border-radius:12px;padding:28px 36px;max-width:420px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.4);">'
+        + '<div style="font-size:36px;margin-bottom:14px;">🔒</div>'
+        + '<div style="font-size:15px;font-weight:600;color:var(--text-main);margin-bottom:8px;">未开通 License 服务</div>'
+        + '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:22px;">「原生精密」属于高阶功能，需开通 License 后方可使用。<br>请联系管理员开通授权。</div>'
+        + '<button onclick="document.getElementById(\'licenseAlertOverlay\').remove()" style="padding:8px 28px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">知道了</button>'
+        + '</div>';
+
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.remove();
+      });
+
+      document.body.appendChild(overlay);
+    }
+
+    // History overlay toggle
+function toggleHistoryOverlay() {
+      var panelRight = document.querySelector('.panel-right');
+      var btn = document.getElementById('historyToggleBtn');
+      var mainContainer = document.querySelector('.main-container');
+      if (!panelRight || !mainContainer) return;
+
+      var isHidden = panelRight.style.display === 'none';
+      panelRight.style.display = isHidden ? 'flex' : 'none';
+      mainContainer.classList.toggle('with-history', isHidden);
+      if (btn) btn.classList.toggle('active', isHidden);
+      
+      // Wait for layout to settle, then recalculate canvas size
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          onWindowResize();
+        });
+      });
+}
     
     function saveUndoState() {
       if (!currentMesh) return;
@@ -699,12 +1025,43 @@
       return `已撤销（剩余 ${undoStack.length} 步）`;
     }
 
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2();
+
+    function onCanvasClick(event) {
+      console.log('[DEBUG] onCanvasClick fired', {
+        isDots: isDots,
+        hasCurrentMesh: !!currentMesh,
+        hasCamera: !!camera,
+        hasScene: !!scene,
+        hasRenderer: !!renderer,
+        eventType: event.type,
+        clientX: event.clientX,
+        clientY: event.clientY
+      });
+      if (!isDots) { console.log('[DEBUG] isDots is false, returning'); return; }
+      if (!currentMesh) { console.log('[DEBUG] no currentMesh, returning'); return; }
+      if (!camera) { console.log('[DEBUG] no camera, returning'); return; }
+      if (!scene) { console.log('[DEBUG] no scene, returning'); return; }
+      event.stopPropagation();
+      var rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      console.log('[DEBUG] mouse', mouse.x.toFixed(3), mouse.y.toFixed(3));
+      raycaster.setFromCamera(mouse, camera);
+      var hits = raycaster.intersectObject(currentMesh, true);
+      console.log('[DEBUG] hits count:', hits.length);
+      if (hits.length > 0) {
+        console.log('[DEBUG] placing marker at', hits[0].point.x, hits[0].point.y, hits[0].point.z);
+        addDotMarker(hits[0].point.clone());
+      }
+    }
+
     function initThree() {
       const canvas = document.getElementById('preview-canvas');
       const container = document.getElementById('previewArea');
-      
-      // Keep placeholder visible until a model is loaded
       canvas.style.display = 'block';
+      console.log('[DEBUG] initThree canvas:', canvas.tagName, canvas.width, 'x', canvas.height, 'clientW/H:', canvas.clientWidth, canvas.clientHeight);
       
       // Scene
       scene = new THREE.Scene();
@@ -720,6 +1077,33 @@
       renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
+
+      var lastClickTime = 0;
+      var isDownPos = null;
+      document.addEventListener('mousedown', function(e) {
+        if (!isDots) return;
+        var rect = renderer.domElement.getBoundingClientRect();
+        if (e.clientX < rect.left || e.clientX > rect.right ||
+            e.clientY < rect.top || e.clientY > rect.bottom) return;
+        isDownPos = { x: e.clientX, y: e.clientY };
+      });
+
+      document.addEventListener('mouseup', function(e) {
+        if (!isDots || !isDownPos) return;
+        var dx = e.clientX - isDownPos.x;
+        var dy = e.clientY - isDownPos.y;
+        isDownPos = null;
+        // Only register as a click if mouse moved less than 6px (not a drag)
+        if (Math.sqrt(dx*dx + dy*dy) > 6) return;
+        var rect = renderer.domElement.getBoundingClientRect();
+        if (e.clientX < rect.left || e.clientX > rect.right ||
+            e.clientY < rect.top || e.clientY > rect.bottom) return;
+        var now = Date.now();
+        if (now - lastClickTime > 150) {
+          pendingClick = { x: e.clientX, y: e.clientY };
+          lastClickTime = now;
+        }
+      });
 
       // Controls
       controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -748,6 +1132,16 @@
         updateFullscreenButton();
         setTimeout(onWindowResize, 50);
       });
+
+      // Observe container size changes (grid layout shifts, panel toggle, etc.)
+      if (typeof ResizeObserver !== 'undefined') {
+        var previewAreaObs = document.getElementById('previewArea');
+        if (previewAreaObs) {
+          new ResizeObserver(function() {
+            onWindowResize();
+          }).observe(previewAreaObs);
+        }
+      }
 
       // Start animation loop
       animate();
@@ -788,6 +1182,26 @@
     function animate() {
       requestAnimationFrame(animate);
       if (controls) controls.update();
+      if (pendingClick && isDots && currentMesh && camera && scene) {
+        var rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((pendingClick.x - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((pendingClick.y - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        var hits = raycaster.intersectObject(currentMesh, true);
+        if (hits.length > 0) {
+          addDotMarker(hits[0].point.clone());
+          updateCoordInfoPanel();
+        }
+        pendingClick = null;
+      }
+      // Make rings always face camera
+      if (camera && dotMarkers.length > 0) {
+        dotMarkers.forEach(function(m) {
+          if (m.ring) {
+            m.ring.lookAt(camera.position);
+          }
+        });
+      }
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
       }
@@ -832,7 +1246,7 @@
 
           // Material
           const material = new THREE.MeshPhongMaterial({
-            color: 0x00d9ff,
+            color: 0x296AFA,
             specular: 0x333333,
             shininess: 100
           });
@@ -874,124 +1288,335 @@
       }
     }
 
-    function toggleWireframe() {
-      if (currentMesh) {
-        isWireframe = !isWireframe;
-        currentMesh.material.wireframe = isWireframe;
-        var btn = document.getElementById('btn-wireframe');
-        if (btn) btn.classList.toggle('active', isWireframe);
+    function setView(view) {
+      if (!camera || !controls) return;
+      var d = 120;
+      var target = new THREE.Vector3(0, 0, 0);
+      controls.target.copy(target);
+      switch (view) {
+        case 'iso':
+          camera.position.set(d * 0.7, d * 0.55, d * 0.7);
+          camera.up.set(0, 1, 0);
+          break;
+        case 'front':
+          camera.position.set(0, 0, d);
+          camera.up.set(0, 1, 0);
+          break;
+        case 'top':
+          camera.position.set(0, d, 0.01);
+          camera.up.set(0, 0, -1);
+          break;
+        case 'right':
+          camera.position.set(d, 0, 0);
+          camera.up.set(0, 1, 0);
+          break;
+      }
+      controls.update();
+    }
+
+    let isDots = false;
+    let pendingClick = null;
+    window.__getIsDots = function() { return isDots; };
+    window.__getCurrentMesh = function() { return !!currentMesh; };
+    window.__getHasRenderer = function() { return !!renderer; };
+    window.__debugCanvas = function() {
+      var c = renderer && renderer.domElement;
+      if (!c) return 'no renderer';
+      var r = c.getBoundingClientRect();
+      return 'canvas rect: ' + JSON.stringify(r) + ', w/h:' + c.width + 'x' + c.height + ', clientW/H:' + c.clientWidth + 'x' + c.clientHeight + ', offsetW/H:' + c.offsetWidth + 'x' + c.offsetHeight + ', pointerEvents:' + getComputedStyle(c).pointerEvents + ', display:' + getComputedStyle(c).display;
+    };
+    const dotMarkers = [];
+
+    function addDotMarker(point) {
+      try {
+        var geo = new THREE.SphereGeometry(1.8, 32, 32);
+        var mat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+        var sphere = new THREE.Mesh(geo, mat);
+        sphere.position.copy(point);
+        sphere.renderOrder = 10;
+        scene.add(sphere);
+        
+        var line = null;
+        if (dotMarkers.length > 0) {
+          var lastPoint = dotMarkers[dotMarkers.length - 1].sphere.position.clone();
+          var direction = new THREE.Vector3().subVectors(point, lastPoint);
+          var distance = direction.length();
+          direction.normalize();
+          
+          var cylinderGeo = new THREE.CylinderGeometry(0.25, 0.25, distance, 12);
+          var cylinderMat = new THREE.MeshBasicMaterial({ color: 0x00FFAA });
+          line = new THREE.Mesh(cylinderGeo, cylinderMat);
+          line.renderOrder = 9;
+          
+          var midpoint = new THREE.Vector3().addVectors(lastPoint, point).multiplyScalar(0.5);
+          line.position.copy(midpoint);
+          
+          var up = new THREE.Vector3(0, 1, 0);
+          var quaternion = new THREE.Quaternion().setFromUnitVectors(up, direction);
+          line.quaternion.copy(quaternion);
+          
+          scene.add(line);
+        }
+        
+        var coordStr = 'X:' + point.x.toFixed(2) + '  Y:' + point.y.toFixed(2) + '  Z:' + point.z.toFixed(2);
+        dotMarkers.push({ sphere: sphere, line: line, coordString: coordStr, label: null });
+      } catch(e) {
+        console.error('addDotMarker error:', e);
       }
     }
 
-    // Initialize on page load
+    function clearDotMarkers() {
+      dotMarkers.forEach(function(m) {
+        if (m.sphere) {
+          scene.remove(m.sphere);
+          m.sphere.geometry.dispose();
+          m.sphere.material.dispose();
+        }
+        if (m.line) {
+          scene.remove(m.line);
+          m.line.geometry.dispose();
+          m.line.material.dispose();
+        }
+      });
+      dotMarkers.length = 0;
+    }
+
+    var coordAxesGroup = null;
+    var pickedCount = 0;
+
+    function createAxisLabelSprite(text, color) {
+      var cvs = document.createElement('canvas');
+      cvs.width = 128;
+      cvs.height = 48;
+      var ctx = cvs.getContext('2d');
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.fillRect(0, 0, 128, 48);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(2, 2, 124, 44);
+      ctx.fillStyle = color;
+      ctx.font = 'bold 22px "SF Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 64, 24);
+      var tex = new THREE.CanvasTexture(cvs);
+      tex.minFilter = THREE.LinearFilter;
+      var mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, depthWrite: false });
+      var sp = new THREE.Sprite(mat);
+      sp.scale.set(8, 3, 1);
+      return sp;
+    }
+
+    function showCoordAxes() {
+      if (coordAxesGroup) {
+        scene.remove(coordAxesGroup);
+        coordAxesGroup.traverse(function(child) {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (child.material.map) child.material.map.dispose();
+            child.material.dispose();
+          }
+        });
+      }
+
+      coordAxesGroup = new THREE.Group();
+      var axisLen = 80;
+      var axisRadius = 0.25;
+
+      function makeAxis(start, end, color) {
+        var dir = new THREE.Vector3().subVectors(end, start);
+        var len = dir.length();
+        dir.normalize();
+        var geo = new THREE.CylinderGeometry(axisRadius, axisRadius, len, 8);
+        var mat = new THREE.MeshBasicMaterial({ color: color });
+        var mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5));
+        var up = new THREE.Vector3(0, 1, 0);
+        mesh.quaternion.setFromUnitVectors(up, dir);
+        return mesh;
+      }
+
+      // X axis (red) -> -X direction (left)
+      coordAxesGroup.add(makeAxis(
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(-axisLen, 0, 0),
+        0xef4444
+      ));
+      var xLabel = createAxisLabelSprite('-X', '#EF4444');
+      xLabel.position.set(-axisLen - 6, 0, 0);
+      coordAxesGroup.add(xLabel);
+
+      // Y axis (green/yellow) -> +Y direction (right)
+      coordAxesGroup.add(makeAxis(
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(axisLen, 0, 0),
+        0x84cc16
+      ));
+      var yLabel = createAxisLabelSprite('+Y', '#A3E635');
+      yLabel.position.set(axisLen + 6, 0, 0);
+      coordAxesGroup.add(yLabel);
+
+      // Z axis (blue) -> +Z direction (up)
+      coordAxesGroup.add(makeAxis(
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, axisLen, 0),
+        0x3b82f6
+      ));
+      var zLabel = createAxisLabelSprite('+Z', '#3B82F6');
+      zLabel.position.set(0, axisLen + 6, 0);
+      coordAxesGroup.add(zLabel);
+
+      // Origin sphere
+      var originGeo = new THREE.SphereGeometry(1.2, 12, 12);
+      var originMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      var originMesh = new THREE.Mesh(originGeo, originMat);
+      coordAxesGroup.add(originMesh);
+
+      scene.add(coordAxesGroup);
+    }
+
+    function hideCoordAxes() {
+      if (coordAxesGroup) {
+        scene.remove(coordAxesGroup);
+        coordAxesGroup.traverse(function(child) {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (child.material.map) child.material.map.dispose();
+            child.material.dispose();
+          }
+        });
+        coordAxesGroup = null;
+      }
+    }
+
+    function updateCoordInfoPanel() {
+      var panel = document.getElementById('coordInfoContent');
+      if (!panel) return;
+      if (!currentMesh) { panel.innerHTML = '<span style="color:#64748b">No mesh loaded</span>'; return; }
+
+      currentMesh.geometry.computeBoundingBox();
+      var bb = currentMesh.geometry.boundingBox;
+      var size = new THREE.Vector3();
+      var center = new THREE.Vector3();
+      bb.getSize(size);
+      bb.getCenter(center);
+
+      var picked = dotMarkers.length > 0 ? dotMarkers[dotMarkers.length - 1].sphere.position : null;
+      var pickedStr = picked
+        ? '(' + picked.x.toFixed(2) + ', ' + picked.y.toFixed(2) + ', ' + picked.z.toFixed(2) + ')'
+        : 'click model surface';
+
+      var html = '<div class="info-row"><span class="info-label">System</span><span class="info-value">CAD Z-up</span></div>'
+        + '<div class="info-row"><span class="info-label">Axes</span><span class="info-value"><span class="red">X</span> red, <span class="green">Y</span> green, <span class="blue">Z</span> blue</span></div>'
+        + '<div class="info-row"><span class="info-label">Center</span><span class="info-value">(' + center.x.toFixed(2) + ', ' + center.y.toFixed(2) + ', ' + center.z.toFixed(2) + ')</span></div>'
+        + '<div class="info-row"><span class="info-label">Size X</span><span class="info-value">' + size.x.toFixed(2) + '</span></div>'
+        + '<div class="info-row"><span class="info-label">Size Y</span><span class="info-value">' + size.y.toFixed(2) + '</span></div>'
+        + '<div class="info-row"><span class="info-label">Size Z</span><span class="info-value">' + size.z.toFixed(2) + '</span></div>'
+        + '<div class="info-row"><span class="info-label">Min</span><span class="info-value">(' + bb.min.x.toFixed(2) + ', ' + bb.min.y.toFixed(2) + ', ' + bb.min.z.toFixed(2) + ')</span></div>'
+        + '<div class="info-row"><span class="info-label">Max</span><span class="info-value">(' + bb.max.x.toFixed(2) + ', ' + bb.max.y.toFixed(2) + ', ' + bb.max.z.toFixed(2) + ')</span></div>'
+        + '<div class="info-row"><span class="info-label">Picked</span><span class="info-value cyan">' + pickedStr + '</span></div>'
+        + '<div class="info-row"><span class="info-label">Picked count</span><span class="info-value">' + dotMarkers.length + '</span></div>'
+        + '<div class="info-row"><span class="info-label">Explode parts</span><span class="info-value">0</span></div>';
+
+      // Add last distance and last label only when 2+ markers exist
+      if (dotMarkers.length >= 2) {
+        var lastMarker = dotMarkers[dotMarkers.length - 1];
+        var prevMarker = dotMarkers[dotMarkers.length - 2];
+        var distance = lastMarker.sphere.position.distanceTo(prevMarker.sphere.position);
+        var lastLabel = lastMarker.coordString || pickedStr;
+        
+        html += '<div class="info-row" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(56,189,248,0.2)"><span class="info-label">Last distance</span><span class="info-value">' + distance.toFixed(2) + '</span></div>'
+          + '<div class="info-row"><span class="info-label">Last label</span><span class="info-value">' + lastLabel + '</span></div>';
+      }
+
+      // Add action buttons row (always when panel is visible, i.e. dots mode active)
+      html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(56,189,248,0.2);display:flex;align-items:center;justify-content:space-between;">';
+      // Left: undo buttons
+      if (dotMarkers.length > 0) {
+        html += '<div style="display:flex;gap:6px;">'
+          + '<button onclick="undoLastMarker()" title="撤销最近一次标记" style="width:30px;height:30px;padding:0;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.3);border-radius:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background=\'rgba(37,99,235,0.3)\'" onmouseout="this.style.background=\'rgba(37,99,235,0.15)\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg></button>'
+          + '<button onclick="undoAllMarkers()" title="清除所有标记点" style="width:30px;height:30px;padding:0;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);border-radius:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background=\'rgba(220,38,38,0.3)\'" onmouseout="this.style.background=\'rgba(220,38,38,0.15)\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>'
+          + '</div>';
+      } else {
+        html += '<div></div>';
+      }
+      // Right: exit dots mode pill button
+      html += '<button onclick="toggleDots()" title="取消标记" style="width:30px;height:30px;padding:0;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background=\'rgba(239,68,68,0.28)\'" onmouseout="this.style.background=\'rgba(239,68,68,0.15)\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+      html += '</div>';
+
+      panel.innerHTML = html;
+    }
+
+    window.undoLastMarker = function() {
+      if (dotMarkers.length === 0) return;
+      var marker = dotMarkers.pop();
+      scene.remove(marker.sphere);
+      marker.sphere.geometry.dispose();
+      marker.sphere.material.dispose();
+      if (marker.line) {
+        scene.remove(marker.line);
+        marker.line.geometry.dispose();
+        marker.line.material.dispose();
+      }
+      updateCoordInfoPanel();
+    };
+
+    window.undoAllMarkers = function() {
+      if (dotMarkers.length === 0) return;
+      clearDotMarkers();
+      updateCoordInfoPanel();
+    };
+
+    window.toggleDots = function() {
+      console.log('[DEBUG] toggleDots called', {
+        hasCurrentMesh: !!currentMesh,
+        hasControls: !!controls,
+        currentIsDots: isDots
+      });
+      if (!currentMesh || !controls) {
+        console.log('[DEBUG] toggleDots early return - no mesh or controls');
+        return;
+      }
+      isDots = !isDots;
+      console.log('[DEBUG] toggleDots isDots now:', isDots);
+      var btn = document.getElementById('btn-dots');
+      if (btn) btn.classList.toggle('active', isDots);
+      var infoPanel = document.getElementById('coordInfoPanel');
+      if (isDots) {
+        showCoordAxes();
+        if (infoPanel) infoPanel.style.display = 'block';
+        updateCoordInfoPanel();
+      } else {
+        clearDotMarkers();
+        hideCoordAxes();
+        if (infoPanel) infoPanel.style.display = 'none';
+      }
+    };
+
+    // Initialize on page load — use rAF to wait for layout pass
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('Page loaded, initializing Three.js...');
-      initThree();
+      var tries = 0;
+      function tryInit() {
+        var c = document.getElementById('previewArea');
+        if (c && c.clientHeight > 0) {
+          console.log('Page loaded, initializing Three.js...');
+          initThree();
+        } else if (tries++ < 30) {
+          setTimeout(tryInit, 50);
+        }
+      }
+      tryInit();
     });
 
     // Button event listeners
-    document.getElementById('btn-wireframe').addEventListener('click', toggleWireframe);
     
     // ========== CHAT FUNCTIONALITY ==========
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
     const chatMessages = document.getElementById('chatMessages');
-    const skillButtons = document.getElementById('skillButtons');
     
     let chatHistory = [];
     let hasModel = false;
-    let activeSkillId = 'ai-designer';
-
-    const SKILL_PROFILES = [
-      {
-        id: 'ai-designer',
-        name: '全域设计',
-        enName: 'AI-DESIGNER',
-        intro: '负责跨能力域任务理解、拆解、编排和结果汇总。\n\n适用范围：\n- 根据用户目标自动识别所需创作方向。\n- 编排中性设计、原生联动、结构仿真、动力学分析等能力链路。\n- 将复杂设计任务拆解为可执行步骤。\n- 汇总模型修改、图纸处理、仿真分析和验证报告结果。\n- 支持多轮对话中的任务续写、能力切换和阶段性总结。',
-        abilities: '负责跨能力域任务理解、拆解、编排和结果汇总。适用范围：根据用户目标自动识别所需创作方向；编排中性设计、原生联动、结构仿真、动力学分析等能力链路；将复杂设计任务拆解为可执行步骤；汇总模型修改、图纸处理、仿真分析和验证报告结果；支持多轮对话中的任务续写、能力切换和阶段性总结。',
-        input: '用户设计目标、三维模型、二维图纸、工程约束、仿真条件、运动工况、历史对话上下文',
-        output: '任务拆解方案、能力调用路径、阶段性设计结果、验证摘要、综合创作报告'
-      },
-      {
-        id: 'ai-stl-stp-dwg',
-        name: '中性设计',
-        enName: 'AI-STL-STP-DWG',
-        intro: '负责中性格式、网格、工程图和可视化相关任务。\n\n适用范围：\n- STL 网格分析、修复、局部修改和 Web 可视化转换。\n- STEP/STP B-Rep 分析、转换、修改和导出。\n- DWG/DXF 二维图纸解析、轮廓提取和三维重建。\n- PDF、扫描图、图片工程图的预处理、矢量化和建模辅助。\n- SVG/DXF/DWG 工程图输出。\n- GLB/glTF Web 预览资产、SVG/PDF/PNG 二维预览资产和可审计预览报告输出。',
-        abilities: '负责中性格式、网格、工程图和可视化相关任务。适用范围：STL 网格分析、修复、局部修改和 Web 可视化转换；STEP/STP B-Rep 分析、转换、修改和导出；DWG/DXF 二维图纸解析、轮廓提取和三维重建；PDF、扫描图、图片工程图的预处理、矢量化和建模辅助；SVG/DXF/DWG 工程图输出；GLB/glTF Web 预览资产、SVG/PDF/PNG 二维预览资产和可审计预览报告输出。',
-        input: 'STL、STEP/STP、DWG/DXF、PDF、扫描图纸、图片类工程图',
-        output: 'STL、STEP/STP、DWG/DXF、SVG、GLB/glTF、PDF、PNG、可审计预览报告'
-      },
-      {
-        id: 'ai-prt-asm-drw',
-        name: '原生联动',
-        enName: 'AI-PRT-ASM-DRW',
-        intro: '负责原生零件、装配、工程图联动能力。\n\n适用范围：\n- 原生零件参数和尺寸读取。\n- 原生零件参数化修改。\n- 装配体再生和关系检查。\n- 工程图再生、保存和显示尺寸验证。\n- 干涉检查。\n- 工程图尺寸链检查。\n- 原生模型变更后的领域级验证报告。',
-        abilities: '负责原生零件、装配、工程图联动能力。适用范围：原生零件参数和尺寸读取；原生零件参数化修改；装配体再生和关系检查；工程图再生、保存和显示尺寸验证；干涉检查；工程图尺寸链检查；原生模型变更后的领域级验证报告。',
-        input: 'PRT（零件）、ASM（装配）、DRW（工程图），Creo/SolidWorks/NX 原生 CAD 文件',
-        output: '编辑后 PRT/ASM/DRW、干涉检查报告、尺寸链检查报告、模型变更验证报告'
-      },
-      {
-        id: 'ai-simulate',
-        name: '结构仿真',
-        enName: 'AI-SIMULATE',
-        intro: '负责结构仿真能力。\n\n适用范围：\n- 材料、约束、载荷、接触、网格、分析工况定义。\n- 静力、模态、屈曲、疲劳、热等结构分析的能力建模。\n- 应力、位移、安全系数等结果输出。\n- 结构仿真报告和验证标准。',
-        abilities: '负责结构仿真能力。适用范围：材料、约束、载荷、接触、网格、分析工况定义；静力、模态、屈曲、疲劳、热等结构分析的能力建模；应力、位移、安全系数等结果输出；结构仿真报告和验证标准。',
-        input: 'PRT/ASM 三维模型、材料参数、载荷/约束、网格参数、分析工况配置文件',
-        output: '应力、位移、安全系数等仿真结果数据、结构仿真报告'
-      },
-      {
-        id: 'ai-mechanism',
-        name: '动力学分析',
-        enName: 'AI-MECHANISM',
-        intro: '负责运动学和动力学分析能力。\n\n适用范围：\n- 刚体、连接、约束、驱动、运动范围定义。\n- 位置、速度、加速度、力、扭矩等运动结果输出。\n- 碰撞、干涉、轨迹、曲线图和动画输出。\n- 运动仿真报告和验证标准。',
-        abilities: '负责运动学和动力学分析能力。适用范围：刚体、连接、约束、驱动、运动范围定义；位置、速度、加速度、力、扭矩等运动结果输出；碰撞、干涉、轨迹、曲线图和动画输出；运动仿真报告和验证标准。',
-        input: 'ASM 装配模型、运动约束、驱动参数、负载配置、运动工况文件',
-        output: '运动参数数据、碰撞/干涉报告、运动轨迹、曲线图、仿真动画、运动仿真报告'
-      }
-    ];
-
-    function getActiveSkill() {
-      return SKILL_PROFILES.find(function(skill) { return skill.id === activeSkillId; }) || SKILL_PROFILES[0];
-    }
-
-    function formatSkillIntro(skill) {
-      return skill.intro;
-    }
-
-    function showActiveSkillIntro() {
-      chatMessages.innerHTML = '';
-      addChatMessage('assistant', formatSkillIntro(getActiveSkill()), true);
-    }
-
-    function renderSkillSelector() {
-      if (!skillButtons) return;
-      skillButtons.innerHTML = '';
-      SKILL_PROFILES.forEach(function(skill) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'skill-btn' + (skill.id === activeSkillId ? ' active' : '');
-        btn.innerHTML = '<span class="skill-btn-name">' + escapeHtml(skill.name) + '</span>'
-          + '<span class="skill-btn-en">' + escapeHtml(skill.enName) + '</span>';
-        btn.setAttribute('data-skill-id', skill.id);
-        btn.addEventListener('click', function() { selectSkill(skill.id, true); });
-        skillButtons.appendChild(btn);
-      });
-    }
-
-    function selectSkill(skillId, shouldAnnounce) {
-      activeSkillId = skillId;
-      if (skillButtons) {
-        skillButtons.querySelectorAll('.skill-btn').forEach(function(btn) {
-          btn.classList.toggle('active', btn.getAttribute('data-skill-id') === activeSkillId);
-        });
-      }
-      if (shouldAnnounce) {
-        showActiveSkillIntro();
-      }
-    }
-
-    renderSkillSelector();
-    showActiveSkillIntro();
     
     // Enable chat when model is loaded
     window.enableChat = function() {
@@ -1013,7 +1638,8 @@
         };
       }
       chatInput.placeholder = "用机械术语描述修改：通孔Φ8、倒角C2、放大到120mm...";
-      showActiveSkillIntro();
+      chatMessages.innerHTML = '';
+      autoAnalyzeGeometry();
     };
     
     function executeCommand(text) {
@@ -1035,19 +1661,29 @@
       }, 100);
     }
     
-    function addChatMessage(role, content, isInit) {
-      // Remove empty state if exists
+    function addChatMessage(role, content, isInit, pdfUrl) {
       const empty = chatMessages.querySelector('.chat-empty');
       if (empty) empty.remove();
-      
+
       const msg = document.createElement('div');
       msg.className = 'chat-message ' + role;
       msg.textContent = content;
-      // Tag with current version counter so we can locate it later
       if (!isInit && role === 'assistant') {
         msg.dataset.vid = versionCounter;
       }
       chatMessages.appendChild(msg);
+
+      if (pdfUrl && role === 'assistant') {
+        const pdfBtn = document.createElement('button');
+        pdfBtn.textContent = '📄 查看 PDF 报告';
+        pdfBtn.style.cssText = 'display:inline-block;margin-top:8px;padding:6px 16px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;';
+        pdfBtn.onmouseenter = function() { this.style.filter = 'brightness(1.1)'; };
+        pdfBtn.onmouseleave = function() { this.style.filter = ''; };
+        pdfBtn.onclick = function() { window.open(pdfUrl, '_blank'); };
+        msg.appendChild(document.createElement('br'));
+        msg.appendChild(pdfBtn);
+      }
+
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
@@ -1103,14 +1739,8 @@
         model: 'anthropic/claude-opus-4.6'
       };
       
-      const activeSkill = getActiveSkill();
       const systemPrompt = `你是AI机械制造设计专家。用户正在对三维零件模型进行参数化修改。
 所有尺寸单位为 mm，保留2位小数。
-
-当前选中技能：${activeSkill.name} ${activeSkill.enName}
-技能能力画像：${activeSkill.abilities}
-支持输入格式：${activeSkill.input}
-标准输出格式：${activeSkill.output}
 
 你需要将用户的自然语言机械设计指令解析为可执行的操作。
 
@@ -1424,21 +2054,23 @@
       const geometry = new THREE.BoxGeometry(width, height, depth, 1, 1, 1);
       
       const material = new THREE.MeshPhongMaterial({
-        color: 0x00d9ff,
+        color: 0x296AFA,
         specular: 0x333333,
         shininess: 100
       });
       
       currentMesh = new THREE.Mesh(geometry, material);
       scene.add(currentMesh);
-      
+
+      document.getElementById('previewControls').style.display = 'flex';
+
       // Enable chat if not already
       if (!hasModel) {
         window.enableChat();
       }
-      
+
       resetCamera();
-      
+
       console.log('Test plate created:', width, 'x', height, 'x', depth);
     };
     
@@ -2217,6 +2849,181 @@
       return { material: material, loadN: loadN, constraint: constraint, loadPosition: loadPosition, caseType: '静力分析' };
     }
 
+    function generateSimPDF(data) {
+      var container = document.createElement('div');
+      container.style.cssText = 'position:fixed;left:-9999px;top:0;width:760px;background:#fff;color:#222;font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;padding:40px;';
+
+      var html = '<h1 style="color:#2563EB;font-size:26px;margin:0 0 8px;text-align:center;">' + data.title + '</h1>'
+        + '<p style="color:#888;font-size:12px;text-align:center;margin:0 0 20px;">AI-Shrek | ' + new Date().toLocaleString('zh-CN') + '</p>'
+        + '<hr style="border:1px solid #2563EB;margin:0 0 18px;">';
+
+      data.sections.forEach(function(section) {
+        html += '<h2 style="color:#1E40AF;font-size:15px;margin:16px 0 10px;">' + section.heading + '</h2>';
+        html += '<table width="100%" style="border-collapse:collapse;font-size:13px;margin-bottom:12px;">';
+        section.items.forEach(function(pair) {
+          html += '<tr style="border-bottom:1px solid #E5E7EB;">'
+            + '<td style="padding:8px 10px;color:#555;width:35%;border-bottom:1px solid #E5E7EB;">' + pair[0] + '</td>'
+            + '<td style="padding:8px 10px;color:#111;border-bottom:1px solid #E5E7EB;">' + pair[1] + '</td>'
+            + '</tr>';
+        });
+        html += '</table>';
+      });
+
+      html += '<p style="color:#aaa;font-size:10px;text-align:center;margin:24px 0 0;">本报告由 AI-Shrek 自动生成，仅供参考</p>';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      return new Promise(function(resolve, reject) {
+        var opts = {
+          margin: 0.4,
+          filename: data.title + '.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().from(container).set(opts).outputPdf('bloburl').then(function(url) {
+          document.body.removeChild(container);
+          resolve(url);
+        }).catch(function(err) {
+          if (container.parentNode) document.body.removeChild(container);
+          reject(err);
+        });
+      });
+    }
+
+    function triggerStructureSim() {
+      if (!currentMesh) { addChatMessage('assistant', '请先上传或创建一个模型。'); return; }
+
+      var btn = document.getElementById('btn-sim-structure');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ 生成中...'; }
+
+      setTimeout(function() {
+        try {
+          var result = runStructureSimulationEstimate('结构仿真 铝合金 固定左侧 顶部载荷1000N');
+          addChatMessage('assistant', result.message);
+
+          var info = analyzeGeometry(currentMesh);
+          var cfg = parseSimulationInput('结构仿真 铝合金 固定左侧 顶部载荷1000N');
+          var dims = info.dims.slice().sort(function(a, b) { return b - a; });
+          var length = Math.max(dims[0], 1);
+          var width = Math.max(dims[1], 1);
+          var thickness = Math.max(dims[2], 1);
+          var area = Math.max(width * thickness, 1);
+          var inertia = Math.max(width * Math.pow(thickness, 3) / 12, 1);
+          var volume = parseFloat(info.volume) || (length * width * thickness);
+          var massG = volume * cfg.material.density / 1000;
+          var avgStress = cfg.loadN / area;
+          var bendingStress = cfg.loadN * length * (thickness / 2) / inertia;
+          var stress = Math.max(avgStress, bendingStress);
+          var displacement = cfg.loadN * Math.pow(length, 3) / (3 * cfg.material.elasticModulus * inertia);
+          var safetyFactor = cfg.material.yieldStrength / Math.max(stress, 0.001);
+          var risk = safetyFactor < 1.5 ? '危险' : (safetyFactor < 3 ? '注意' : '安全');
+
+          var pdfPromise = generateSimPDF({
+            title: '结构仿真报告',
+            sections: [
+              { heading: '工况配置', items: [
+                ['材料', cfg.material.name],
+                ['弹性模量', (cfg.material.elasticModulus / 1000).toFixed(1) + ' GPa'],
+                ['屈服强度', cfg.material.yieldStrength.toFixed(0) + ' MPa'],
+                ['约束', cfg.constraint],
+                ['载荷', cfg.loadN.toFixed(0) + ' N（' + cfg.loadPosition + '）'],
+                ['工况', cfg.caseType]
+              ]},
+              { heading: '几何估算', items: [
+                ['外形尺寸', info.dimX + ' × ' + info.dimY + ' × ' + info.dimZ + ' mm'],
+                ['等效承载截面积', area.toFixed(2) + ' mm²'],
+                ['估算体积', volume.toFixed(2) + ' mm³'],
+                ['估算质量', massG.toFixed(2) + ' g']
+              ]},
+              { heading: '结果估算', items: [
+                ['平均拉压应力', avgStress.toFixed(2) + ' MPa'],
+                ['弯曲控制应力', bendingStress.toFixed(2) + ' MPa'],
+                ['控制应力', stress.toFixed(2) + ' MPa'],
+                ['估算位移', displacement.toFixed(4) + ' mm'],
+                ['安全系数', safetyFactor.toFixed(2)],
+                ['风险等级', risk]
+              ]}
+            ]
+          });
+
+          pdfPromise.then(function(pdfUrl) {
+            addChatMessage('assistant', '📄 [点击查看结构仿真报告 PDF]', null, pdfUrl);
+            if (btn) { btn.disabled = false; btn.textContent = '⚙️ 结构仿真'; }
+          }).catch(function(err) {
+            addChatMessage('assistant', '仿真报告生成失败：' + err.message);
+            if (btn) { btn.disabled = false; btn.textContent = '⚙️ 结构仿真'; }
+          });
+        } catch(e) {
+          addChatMessage('assistant', '仿真报告生成失败：' + e.message);
+          if (btn) { btn.disabled = false; btn.textContent = '⚙️ 结构仿真'; }
+        }
+      }, 300);
+    }
+
+    function triggerMechanismSim() {
+      if (!currentMesh) { addChatMessage('assistant', '请先上传或创建一个模型。'); return; }
+      var info = analyzeGeometry(currentMesh);
+      if (!info) { addChatMessage('assistant', '无法分析当前模型几何信息。'); return; }
+
+      var btn = document.getElementById('btn-sim-mechanism');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ 生成中...'; }
+
+      var msg = '⚙️ 动力学仿真报告（experimental）\n\n'
+        + '【模型几何】\n'
+        + '外形尺寸：' + info.dimX + ' × ' + info.dimY + ' × ' + info.dimZ + ' mm\n'
+        + '体积：' + info.volume + ' mm³\n'
+        + '主体结构：' + info.bodyType + '\n\n'
+        + '【运动分析域】\n'
+        + '刚体数：1（当前单零件，装配体分析需导入多体模型）\n'
+        + '可用运动仿真类型：\n'
+        + '- 纯旋转（绕指定轴角速度）\n'
+        + '- 纯平移（直线/曲线路径）\n'
+        + '- 复合运动（旋转+平移）\n'
+        + '- 碰撞干涉检查\n\n'
+        + '【说明】\n'
+        + '前端预估不等同于多体动力学 FEA，报告状态：experimental。\n'
+        + '在对话框中输入运动条件（如"绕Y 100rpm 旋转"）获取详细仿真结果。';
+      addChatMessage('assistant', msg);
+
+      setTimeout(function() {
+        try {
+          var pdfPromise = generateSimPDF({
+            title: '动力学仿真报告',
+            sections: [
+              { heading: '模型几何', items: [
+                ['外形尺寸', info.dimX + ' × ' + info.dimY + ' × ' + info.dimZ + ' mm'],
+                ['体积', info.volume + ' mm³'],
+                ['主体结构', info.bodyType]
+              ]},
+              { heading: '运动分析域', items: [
+                ['刚体数', '1（当前单零件，装配体分析需导入多体模型）'],
+                ['仿真类型 1', '纯旋转（绕指定轴角速度）'],
+                ['仿真类型 2', '纯平移（直线/曲线路径）'],
+                ['仿真类型 3', '复合运动（旋转+平移）'],
+                ['仿真类型 4', '碰撞干涉检查']
+              ]},
+              { heading: '说明', items: [
+                ['状态', 'experimental — 前端预估不等同于多体动力学 FEA'],
+                ['提示', '在对话框中输入运动条件（如"绕Y轴 100rpm 旋转"）获取详细仿真结果']
+              ]}
+            ]
+          });
+
+          pdfPromise.then(function(pdfUrl) {
+            addChatMessage('assistant', '📄 [点击查看动力学仿真报告 PDF]', null, pdfUrl);
+            if (btn) { btn.disabled = false; btn.textContent = '🔧 动力学仿真'; }
+          }).catch(function(err) {
+            addChatMessage('assistant', 'PDF 报告生成失败：' + err.message);
+            if (btn) { btn.disabled = false; btn.textContent = '🔧 动力学仿真'; }
+          });
+        } catch(e) {
+          addChatMessage('assistant', 'PDF 报告生成失败：' + e.message);
+          if (btn) { btn.disabled = false; btn.textContent = '🔧 动力学仿真'; }
+        }
+      }, 300);
+    }
+
     function runStructureSimulationEstimate(text) {
       var info = analyzeGeometry(currentMesh);
       if (!info) return { message: '无法生成结构仿真报告：当前模型几何信息不可用。' };
@@ -2365,20 +3172,23 @@
       if (e.key === 'Enter') sendMessage();
     });
 
-    // STL Upload
-    const uploadArea = document.getElementById('uploadArea');
+    // STL Upload — attach to all 3 tab upload areas
     const fileInput = document.getElementById('fileInput');
-    const loading = document.getElementById('loading');
     const VISUAL_PREVIEW_EXTENSIONS = ['stl', 'ply', 'obj', '3mf', 'step', 'stp', 'iges', 'igs', 'prt', 'asm', 'drw', 'dwg', 'dxf', 'pdf', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'tif', 'tiff'];
     const BROWSER_PREVIEW_EXTENSIONS = ['stl', 'step', 'stp'];
-    
-    uploadArea.addEventListener('click', () => fileInput.click());
-    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('dragover');
-      if (e.dataTransfer.files.length) handleSTLFile(e.dataTransfer.files[0]);
+
+    function getActiveLoading() {
+      return document.getElementById('loading' + DESIGN_TABS.indexOf(activeDesignTab));
+    }
+
+    document.querySelectorAll('.panel-left .upload-area').forEach(function(ua) {
+      ua.addEventListener('dragover', function(e) { e.preventDefault(); ua.classList.add('dragover'); });
+      ua.addEventListener('dragleave', function() { ua.classList.remove('dragover'); });
+      ua.addEventListener('drop', function(e) {
+        e.preventDefault();
+        ua.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleSTLFile(e.dataTransfer.files[0]);
+      });
     });
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length) handleSTLFile(e.target.files[0]);
@@ -2401,6 +3211,12 @@
 
     // Current active file id
     let activeFileId = null;
+
+    // Current project ID from URL params
+    var currentProjectId = (function() {
+      var params = new URLSearchParams(window.location.search);
+      return params.get('project') || null;
+    })();
 
     function getFileExtension(fileName) {
       var parts = fileName.toLowerCase().split('.');
@@ -2453,7 +3269,7 @@
         return;
       }
       
-      loading.classList.add('show');
+      getActiveLoading().classList.add('show');
       
       // Assign a new file ID immediately
       var newFileId = Date.now().toString(36);
@@ -2461,19 +3277,19 @@
       
       if (isSTEP) {
         loadSTEP(file, function() {
-          loading.classList.remove('show');
+          getActiveLoading().classList.remove('show');
           clearVersionHistory();
           saveFileToHistory(file, newFileId);
           autoAnalyzeGeometry();
         });
       } else if (isSTL) {
         loadSTL(file);
-        loading.classList.remove('show');
+        getActiveLoading().classList.remove('show');
         clearVersionHistory();
         saveFileToHistory(file, newFileId);
         setTimeout(autoAnalyzeGeometry, 200);
       } else if (!canPreviewInBrowser) {
-        loading.classList.remove('show');
+        getActiveLoading().classList.remove('show');
         clearVersionHistory();
         saveFileToHistory(file, newFileId);
         showPendingPreview(file);
@@ -2538,7 +3354,7 @@
           var scale = 80 / maxDim;
           
           var material = new THREE.MeshPhongMaterial({
-            color: 0x00d9ff, specular: 0x333333, shininess: 100
+            color: 0x296AFA, specular: 0x333333, shininess: 100
           });
           
           currentMesh = new THREE.Mesh(geometry, material);
@@ -2561,16 +3377,20 @@
       reader.readAsArrayBuffer(file);
     }
 
-    // ========== UPLOAD HISTORY (localStorage) ==========
-    const FILE_HISTORY_KEY = 'stl_upload_history';
+    // ========== UPLOAD HISTORY (per project + tab, localStorage) ==========
+    function getFileHistoryKey(tabId) {
+      var pid = currentProjectId || 'default';
+      return 'stl_upload_history_' + pid + '_' + (tabId || activeDesignTab);
+    }
 
     function getFileHistory() {
       try {
-        return JSON.parse(localStorage.getItem(FILE_HISTORY_KEY) || '[]');
+        return JSON.parse(localStorage.getItem(getFileHistoryKey()) || '[]');
       } catch (e) { return []; }
     }
 
     function saveFileToHistory(file, fileId) {
+      var key = getFileHistoryKey();
       const history = getFileHistory();
       const id = fileId || Date.now().toString(36);
       
@@ -2582,18 +3402,19 @@
           name: file.name,
           size: file.size,
           time: Date.now(),
-          data: e.target.result  // base64 data URL
+          data: e.target.result,  // base64 data URL
+          projectId: currentProjectId
         };
         // Prepend (newest first), limit to 20
         history.unshift(entry);
         if (history.length > 20) history.pop();
         try {
-          localStorage.setItem(FILE_HISTORY_KEY, JSON.stringify(history));
+          localStorage.setItem(key, JSON.stringify(history));
         } catch (err) {
           // Storage full — remove oldest entries
           while (history.length > 3) {
             history.pop();
-            try { localStorage.setItem(FILE_HISTORY_KEY, JSON.stringify(history)); break; }
+            try { localStorage.setItem(key, JSON.stringify(history)); break; }
             catch (e2) { /* keep popping */ }
           }
         }
@@ -2603,18 +3424,19 @@
     }
 
     function renderFileHistory() {
-      const list = document.getElementById('fileList');
-      const empty = document.getElementById('fileListEmpty');
-      const history = getFileHistory();
+      var tabIdx = DESIGN_TABS.indexOf(activeDesignTab);
+      var list = document.getElementById('fileList' + tabIdx);
+      var history = getFileHistory();
       
-      // Remove old items (keep empty placeholder logic)
+      // Remove old items, keep empty placeholder
+      var emptyEl = list.querySelector('.file-list-empty');
       list.querySelectorAll('.file-item').forEach(el => el.remove());
       
       if (history.length === 0) {
-        empty.style.display = 'block';
+        if (emptyEl) emptyEl.style.display = 'block';
         return;
       }
-      empty.style.display = 'none';
+      if (emptyEl) emptyEl.style.display = 'none';
       
       history.forEach(function(entry) {
         const div = document.createElement('div');
@@ -2663,9 +3485,9 @@
       var ext = getFileExtension(entry.name);
       var file = new File([bytes], entry.name);
       if (ext === 'step' || ext === 'stp') {
-        loading.classList.add('show');
+        getActiveLoading().classList.add('show');
         loadSTEP(file, function() {
-          loading.classList.remove('show');
+          getActiveLoading().classList.remove('show');
           activeFileId = id;
           renderFileHistory();
           switchVersionHistory(id);
@@ -2701,7 +3523,7 @@
         const maxDim = Math.max(size.x, size.y, size.z);
         const scale = 80 / maxDim;
         
-        const material = new THREE.MeshPhongMaterial({ color: 0x00d9ff, specular: 0x333333, shininess: 100 });
+        const material = new THREE.MeshPhongMaterial({ color: 0x296AFA, specular: 0x333333, shininess: 100 });
         currentMesh = new THREE.Mesh(geometry, material);
         currentMesh.scale.set(scale, scale, scale);
         currentMesh.rotation.x = -Math.PI / 2;
@@ -2723,8 +3545,9 @@
     }
 
     function removeFileFromHistory(id) {
+      var key = getFileHistoryKey();
       var history = getFileHistory().filter(function(h) { return h.id !== id; });
-      localStorage.setItem(FILE_HISTORY_KEY, JSON.stringify(history));
+      localStorage.setItem(key, JSON.stringify(history));
       // Also remove its version history
       try { localStorage.removeItem(VERSION_STORE_PREFIX + id); } catch(e) {}
       if (activeFileId === id) activeFileId = null;
@@ -2824,7 +3647,7 @@
 
       // Do the heavy snapshot work after a delay to show "生成中" state
       setTimeout(function() {
-        var el = document.querySelector('.version-item[data-version-id="' + vid + '"]');
+        var els = document.querySelectorAll('.version-item[data-version-id="' + vid + '"]');
         try {
           if (currentMesh) {
             record.geoB64 = geometryToBase64(currentMesh.geometry);
@@ -2836,12 +3659,12 @@
           }
           record.status = 'done';
           saveFileVersions(activeFileId, currentVersionRecords);
-          if (el) updateVersionStatus(el, 'done');
+          els.forEach(function(el) { updateVersionStatus(el, 'done'); });
         } catch (err) {
           console.error('Version snapshot failed:', err);
           record.status = 'failed';
           saveFileVersions(activeFileId, currentVersionRecords);
-          if (el) updateVersionStatus(el, 'failed');
+          els.forEach(function(el) { updateVersionStatus(el, 'failed'); });
         }
       }, 3000);
 
@@ -2860,8 +3683,11 @@
     // Render a single version item into the list (prepend)
     function renderVersionItem(record) {
       var list = document.getElementById('versionList');
+      var listRight = document.getElementById('versionListRight');
       var empty = document.getElementById('versionListEmpty');
       if (empty) empty.style.display = 'none';
+      var emptyRight = document.getElementById('versionListRightEmpty');
+      if (emptyRight) emptyRight.style.display = 'none';
 
       var d = new Date(record.time);
       var timeStr = d.getHours().toString().padStart(2, '0') + ':' +
@@ -2875,11 +3701,7 @@
       var statusText = statusClass === 'generating' ? '' : (statusClass === 'failed' ? '失败' : '已完成');
       var statusStyle = statusClass === 'done' ? ' style="opacity:0"' : '';
 
-      var div = document.createElement('div');
-      div.className = 'version-item ' + statusClass;
-      div.dataset.versionId = record.id;
-
-      div.innerHTML = '<div class="version-top">'
+      var itemHtml = '<div class="version-top">'
         + '<span class="version-status-dot ' + statusClass + '"></span>'
         + '<span class="version-desc">' + escapeHtml(record.action) + '</span>'
         + '<span class="version-time">' + timeStr + '</span>'
@@ -2898,7 +3720,17 @@
         + '</span>'
         + '</div>';
 
+      var div = document.createElement('div');
+      div.className = 'version-item ' + statusClass;
+      div.dataset.versionId = record.id;
+      div.innerHTML = itemHtml;
       list.insertBefore(div, list.firstChild);
+
+      var divRight = document.createElement('div');
+      divRight.className = 'version-item ' + statusClass;
+      divRight.dataset.versionId = record.id;
+      divRight.innerHTML = itemHtml;
+      listRight.insertBefore(divRight, listRight.firstChild);
 
       // Click item to toggle detail panel + switch preview + scroll chat
       div.addEventListener('click', function(e) {
@@ -2907,11 +3739,33 @@
         var wasSelected = div.classList.contains('selected');
         // Deselect all
         list.querySelectorAll('.version-item.selected').forEach(function(el) { el.classList.remove('selected'); });
+        listRight && listRight.querySelectorAll('.version-item.selected').forEach(function(el) { el.classList.remove('selected'); });
         // Clear chat highlights
         chatMessages.querySelectorAll('.chat-message.highlight').forEach(function(el) { el.classList.remove('highlight'); });
-        
+
         if (!wasSelected) {
           div.classList.add('selected');
+          divRight && divRight.classList.add('selected');
+          switchToVersionPreview(vid);
+          scrollChatToVersion(vid);
+        } else {
+          restoreLiveState();
+        }
+      });
+
+      divRight && divRight.addEventListener('click', function(e) {
+        if (e.target.closest('.version-actions')) return;
+        var vid = parseInt(divRight.dataset.versionId);
+        var wasSelected = divRight.classList.contains('selected');
+        // Deselect all
+        list && list.querySelectorAll('.version-item.selected').forEach(function(el) { el.classList.remove('selected'); });
+        listRight && listRight.querySelectorAll('.version-item.selected').forEach(function(el) { el.classList.remove('selected'); });
+        // Clear chat highlights
+        chatMessages.querySelectorAll('.chat-message.highlight').forEach(function(el) { el.classList.remove('highlight'); });
+
+        if (!wasSelected) {
+          divRight.classList.add('selected');
+          div && div.classList.add('selected');
           switchToVersionPreview(vid);
           scrollChatToVersion(vid);
         } else {
@@ -3026,8 +3880,11 @@
       cleanupRuntimeSnapshots();
       // Clear DOM
       var list = document.getElementById('versionList');
+      var listRight = document.getElementById('versionListRight');
       var empty = document.getElementById('versionListEmpty');
+      var emptyRight = document.getElementById('versionListRightEmpty');
       list.querySelectorAll('.version-item').forEach(function(el) { el.remove(); });
+      if (listRight) listRight.querySelectorAll('.version-item').forEach(function(el) { el.remove(); });
 
       // Load persisted records for new file
       currentVersionRecords = getFileVersions(newFileId);
@@ -3037,8 +3894,10 @@
 
       if (currentVersionRecords.length === 0) {
         if (empty) empty.style.display = 'block';
+        if (emptyRight) emptyRight.style.display = 'block';
       } else {
         if (empty) empty.style.display = 'none';
+        if (emptyRight) emptyRight.style.display = 'none';
         // Render in order (oldest first so newest ends up on top)
         currentVersionRecords.forEach(function(rec) { renderVersionItem(rec); });
       }
@@ -3050,9 +3909,13 @@
       currentVersionRecords = [];
       versionCounter = 0;
       var list = document.getElementById('versionList');
+      var listRight = document.getElementById('versionListRight');
       var empty = document.getElementById('versionListEmpty');
+      var emptyRight = document.getElementById('versionListRightEmpty');
       list.querySelectorAll('.version-item').forEach(function(el) { el.remove(); });
+      if (listRight) listRight.querySelectorAll('.version-item').forEach(function(el) { el.remove(); });
       if (empty) empty.style.display = 'block';
+      if (emptyRight) emptyRight.style.display = 'block';
     }
 
     // ========== VERSION PREVIEW SWITCHING ==========
@@ -3274,7 +4137,7 @@
           var proj = projects.find(function(p) { return p.id === projectId; });
           if (proj) {
             document.getElementById('projectNameDisplay').textContent = proj.name;
-            document.title = proj.name + ' - AI-3D设计大师';
+            document.title = proj.name + ' - AI-Shrek';
           }
         } catch(e) {}
       }

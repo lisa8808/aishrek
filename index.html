@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>AI-3D设计大师 - 项目列表</title>
+  <title>AI-Shrek - 项目列表</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -333,14 +333,13 @@
     }
 
     .card-preview {
+      position: relative;
       height: 140px;
-      background: radial-gradient(circle at center, rgba(37,99,235,0.12), rgba(8,13,26,0.92));
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1));
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      gap: 8px;
-      border-bottom: 1px solid var(--border-soft);
+      overflow: hidden;
     }
     .card-preview-icon { font-size: 32px; color: rgba(148,163,184,0.42); animation: gear-spin 8s linear infinite; }
     @keyframes gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -485,7 +484,7 @@
 <body>
   <header class="header">
     <div class="header-title">
-      ⚙️ <span class="hl">AI-3D</span> 设计 <span class="hl">大师</span>
+      ⚙️ <span class="hl">AI-Shrek</span>
     </div>
     <div class="header-right">
       <div class="user-area" onclick="toggleUserDropdown(event)">
@@ -786,8 +785,134 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/STLLoader.js"></script>
+
   <script>
     const PROJECTS_KEY = 'stl_projects';
+
+    // ---- STL thumbnail renderer (offscreen, cached) ----
+    const THUMB_CACHE_PREFIX = 'stl_thumb_';
+    var _thumbCanvas = null;
+    var _thumbScene = null;
+    var _thumbCamera = null;
+    var _thumbRenderer = null;
+
+    function ensureThumbRenderer() {
+      if (_thumbRenderer) return;
+      _thumbCanvas = document.createElement('canvas');
+      _thumbCanvas.width = 320;
+      _thumbCanvas.height = 240;
+      _thumbRenderer = new THREE.WebGLRenderer({ canvas: _thumbCanvas, antialias: true, alpha: true });
+      _thumbRenderer.setSize(320, 240);
+      _thumbRenderer.setPixelRatio(1);
+      _thumbRenderer.setClearColor(0x0f1629, 1);
+      _thumbScene = new THREE.Scene();
+      _thumbCamera = new THREE.PerspectiveCamera(35, 320 / 240, 0.1, 5000);
+      _thumbScene.add(new THREE.AmbientLight(0xffffff, 0.75));
+      var dl = new THREE.DirectionalLight(0xffffff, 0.6);
+      dl.position.set(1, 1.2, 1.5);
+      _thumbScene.add(dl);
+      var dl2 = new THREE.DirectionalLight(0xffffff, 0.35);
+      dl2.position.set(-1, -0.5, -1);
+      _thumbScene.add(dl2);
+    }
+
+    function dataUrlToArrayBuffer(dataUrl) {
+      var comma = dataUrl.indexOf(',');
+      if (comma < 0) return null;
+      var base64 = dataUrl.slice(comma + 1);
+      var bin = atob(base64);
+      var len = bin.length;
+      var buf = new ArrayBuffer(len);
+      var view = new Uint8Array(buf);
+      for (var i = 0; i < len; i++) view[i] = bin.charCodeAt(i);
+      return buf;
+    }
+
+    function renderStlThumbnail(stlDataUrl) {
+      ensureThumbRenderer();
+      var buf = dataUrlToArrayBuffer(stlDataUrl);
+      if (!buf) return null;
+      var geometry;
+      try {
+        geometry = new THREE.STLLoader().parse(buf);
+      } catch (e) { return null; }
+
+      geometry.computeBoundingBox();
+      var center = new THREE.Vector3();
+      geometry.boundingBox.getCenter(center);
+      geometry.translate(-center.x, -center.y, -center.z);
+      var size = new THREE.Vector3();
+      geometry.boundingBox.getSize(size);
+      var maxDim = Math.max(size.x, size.y, size.z) || 1;
+
+      var mat = new THREE.MeshPhongMaterial({ color: 0x296AFA, specular: 0x555555, shininess: 60 });
+      var mesh = new THREE.Mesh(geometry, mat);
+      mesh.rotation.x = -Math.PI / 2;
+      _thumbScene.add(mesh);
+
+      var dist = maxDim * 2.8;
+      _thumbCamera.position.set(dist * 0.7, dist * 0.55, dist * 0.7);
+      _thumbCamera.up.set(0, 1, 0);
+      _thumbCamera.lookAt(0, 0, 0);
+      _thumbCamera.updateProjectionMatrix();
+
+      _thumbRenderer.render(_thumbScene, _thumbCamera);
+      var dataUrl = _thumbCanvas.toDataURL('image/png');
+
+      _thumbScene.remove(mesh);
+      geometry.dispose();
+      mat.dispose();
+      return dataUrl;
+    }
+
+    function getAllStlEntries(projectId) {
+      var entries = [];
+      // Support both old format (stl_upload_history_{tab}) and new format (stl_upload_history_{projectId}_{tab})
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (!key.startsWith('stl_upload_history_')) continue;
+          // Skip version history keys
+          if (key.startsWith('stl_version_history_')) continue;
+          
+          var arr = JSON.parse(localStorage.getItem(key) || '[]');
+          arr.forEach(function(e) {
+            var name = (e.name || '').toLowerCase();
+            if (name.endsWith('.stl') && e.data &&
+                (!projectId || e.projectId === projectId)) {
+              entries.push(e);
+            }
+          });
+        }
+      } catch (e) {}
+      entries.sort(function(a, b) { return (b.time || 0) - (a.time || 0); });
+      return entries;
+    }
+
+    function getStlThumb(stlDataUrl) {
+      if (!stlDataUrl) return null;
+      var key = THUMB_CACHE_PREFIX + _simpleHash(stlDataUrl.slice(0, 4096));
+      try {
+        var cached = localStorage.getItem(key);
+        if (cached) return cached;
+      } catch (e) {}
+      var thumb = renderStlThumbnail(stlDataUrl);
+      if (thumb) {
+        try { localStorage.setItem(key, thumb); } catch (e) {}
+      }
+      return thumb;
+    }
+
+    function _simpleHash(s) {
+      var h = 0;
+      for (var i = 0; i < s.length; i++) {
+        h = ((h << 5) - h) + s.charCodeAt(i);
+        h |= 0;
+      }
+      return (h >>> 0).toString(16);
+    }
 
     function getProjects() {
       try { return JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]'); }
@@ -931,7 +1056,7 @@
       empty.style.display = 'none';
       grid.innerHTML = '';
 
-      filtered.forEach(function(proj) {
+      filtered.forEach(function(proj, projIdx) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.id = proj.id;
@@ -943,10 +1068,17 @@
         const createdDate = new Date(proj.createdAt);
         const dateStr = createdDate.getFullYear() + '/' + String(createdDate.getMonth()+1).padStart(2,'0') + '/' + String(createdDate.getDate()).padStart(2,'0');
 
+        var stlEntries = getAllStlEntries(proj.id);
+        var entry = stlEntries.length > 0 ? stlEntries[0] : null;
+        var thumbUrl = entry ? getStlThumb(entry.data) : null;
+        var previewBg = thumbUrl ? 'background:url(' + thumbUrl + ') center/cover no-repeat;' : '';
+        var previewContent = thumbUrl
+          ? ''
+          : '<div class="card-preview-icon">⚙️</div><div class="card-preview-text">暂无项目预览图</div>';
+
         card.innerHTML = ''
-          + '<div class="card-preview">'
-          + '  <div class="card-preview-icon">⚙️</div>'
-          + '  <div class="card-preview-text">暂无项目预览图</div>'
+          + '<div class="card-preview" style="' + previewBg + '">'
+          +     previewContent
           + '  <div class="card-actions">'
           + '    <button class="card-action-btn" title="重命名" onclick="renameProject(\'' + proj.id + '\', event)">✏️</button>'
           + '    <button class="card-action-btn danger" title="删除" onclick="deleteProject(\'' + proj.id + '\', event)">🗑️</button>'
