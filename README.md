@@ -39,7 +39,7 @@ vercel login
 
 ### 2. Deploy
 ```bash
-cd stl-preview
+cd aishrek
 vercel
 ```
 
@@ -51,7 +51,7 @@ vercel --prod
 ## Project Structure
 
 ```
-stl-preview/
+aishrek/
 ├── vercel.json           # Vercel config
 ├── README.md             # This file
 ├── api/

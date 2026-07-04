@@ -31,7 +31,7 @@ No build step. No framework. All inline vanilla HTML/CSS/JS.
 
 ## Deployment
 
-- **Live URL**: `https://lisa8808.github.io/stl-preview/`
+- **Live URL**: `https://lisa8808.github.io/aishrek/`
 - **GitHub Pages** from `master` branch root
 - **CDN cache**: 10-minute `max-age`, users see stale content unless cache-busted with query params (`?v=N`)
 - Always suggest `Cmd+Shift+R` or `?v=N` for users after pushing changes
