@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>AI-Shrek - 登录</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #080D1A;
+      --bg-panel: rgba(17,24,43,0.88);
+      --bg-card: rgba(18,27,48,0.82);
+      --border-soft: rgba(148,163,184,0.12);
+      --border-active: rgba(37,99,235,0.48);
+      --text-main: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --primary: #2563EB;
+      --primary-soft: rgba(37,99,235,0.14);
+      --accent: #38BDF8;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at 18% -10%, rgba(37,99,235,0.18), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(56,189,248,0.12), transparent 30%),
+        linear-gradient(180deg, #080D1A 0%, #0A0E1B 58%, #070B14 100%);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+    }
+
+    .login-card {
+      background: linear-gradient(180deg, rgba(18,24,43,0.96), rgba(10,14,27,0.98));
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      padding: 40px 36px 32px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56,189,248,0.4), transparent);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .login-logo {
+      font-size: 38px;
+      margin-bottom: 12px;
+      display: inline-block;
+      filter: drop-shadow(0 4px 16px rgba(56,189,248,0.25));
+    }
+
+    .login-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .login-title .hl { color: var(--accent); }
+
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(8,13,26,0.7);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--border-active);
+      background: rgba(8,13,26,0.95);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .forgot-hint {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 8px 24px rgba(37,99,235,0.35);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(37,99,235,0.45);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-help {
+      margin-top: 24px;
+      padding: 14px;
+      background: rgba(56,189,248,0.06);
+      border: 1px solid rgba(56,189,248,0.15);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .login-help code {
+      background: rgba(8,13,26,0.9);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+      font-size: 11px;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      background: rgba(239,68,68,0.95);
+      color: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(4px);
+    }
+    .toast.success {
+      background: rgba(34,197,94,0.95);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginToast" class="toast"></div>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">⚙️</div>
+        <div class="login-title"><span class="hl">AI-Shrek</span> 3D设计大师</div>
+        <div class="login-subtitle">请登录以继续使用</div>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginAccount">账号</label>
+          <input
+            class="form-input"
+            id="loginAccount"
+            type="text"
+            placeholder="请输入账号"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">密码</label>
+          <input
+            class="form-input"
+            id="loginPassword"
+            type="password"
+            placeholder="请输入密码"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe" checked />
+            <span>记住我</span>
+          </label>
+          <span class="forgot-hint">忘记密码请联系管理员</span>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">登录</button>
+      </form>
+
+      <div class="login-help">
+        <div style="margin-bottom:6px;color:#38BDF8;font-weight:600;">默认账户</div>
+        <div>管理员:<code>admin</code> / <code>admin123</code></div>
+        <div>演示成员:<code>zhangsan@demo.com</code> / <code>123456</code></div>
+        <div>演示成员:<code>lisi@demo.com</code> / <code>123456</code></div>
+      </div>
+    </div>
+
+    <div class="login-footer">
+      © 2026 AI-Shrek · Powered by Three.js + LLM
+    </div>
+  </div>
+
+  <script>
+    // ====== Constants ======
+    const MEMBERS_KEY = 'stl_members';
+    const CURRENT_USER_KEY = 'stl_current_user';
+    const USAGE_KEY = 'ai_shrek_usage_track';
+
+    // 默认账户种子数据(仅首次访问写入)
+    const DEFAULT_MEMBERS = [
+      { name: '管理员', account: 'admin', password: 'admin123', role: '管理员', time: '2024-01-15' },
+      { name: '张三', account: 'zhangsan@demo.com', password: '123456', role: '成员', time: '2024-02-10' },
+      { name: '李四', account: 'lisi@demo.com', password: '123456', role: '成员', time: '2024-03-22' }
+    ];
+
+    // ====== Toast ======
+    function showToast(message, type) {
+      const t = document.getElementById('loginToast');
+      t.textContent = message;
+      t.className = 'toast show' + (type === 'success' ? ' success' : '');
+      setTimeout(function() {
+        t.className = 'toast' + (type === 'success' ? ' success' : '');
+      }, 2500);
+    }
+
+    // ====== Data helpers ======
+    function getMembers() {
+      try { return JSON.parse(localStorage.getItem(MEMBERS_KEY) || '[]'); }
+      catch (e) { return []; }
+    }
+
+    function saveMembers(arr) {
+      try { localStorage.setItem(MEMBERS_KEY, JSON.stringify(arr)); }
+      catch (e) {}
+    }
+
+    // ====== Init: 种子默认成员 + 数据迁移补全 ======
+    (function seedAndMigrate() {
+      let members = getMembers();
+      let changed = false;
+
+      // 1. 全新环境: 直接写入默认成员
+      if (members.length === 0) {
+        saveMembers(DEFAULT_MEMBERS);
+        return;
+      }
+
+      // 2. 已有成员: 兜底迁移
+      // 2a. 缺密码的旧成员补上默认密码 '123456'
+      members.forEach(function(m) {
+        if (!m.password && m.password !== '') {
+          m.password = '123456';
+          changed = true;
+        }
+      });
+
+      // 2b. 确保 admin/admin123 存在
+      var hasAdmin = members.some(function(m) { return m.account === 'admin'; });
+      if (!hasAdmin) {
+        members.unshift({ name: '管理员', account: 'admin', password: 'admin123', role: '管理员', time: '2024-01-15' });
+        changed = true;
+      }
+
+      // 2c. 确保默认演示成员存在(张三/李四)
+      DEFAULT_MEMBERS.forEach(function(dm) {
+        var exists = members.some(function(m) { return m.account === dm.account; });
+        if (!exists) {
+          members.push(dm);
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        saveMembers(members);
+      }
+    })();
+
+    // ====== 每日登录奖励 ======
+    function recordLoginTokens(user) {
+      try {
+        const records = JSON.parse(localStorage.getItem(USAGE_KEY) || '[]');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // 今天已赠过该用户，跳过
+        const alreadyGiven = records.some(function(r) {
+          return r.type === 'login'
+            && r.account === user.account
+            && r.time >= today.getTime();
+        });
+        if (alreadyGiven) return;
+
+        records.unshift({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          type: 'login',
+          account: user.account,
+          project: '-',
+          creativeType: '-',
+          creativeDesc: '每日登录奖励',
+          tokens: 1000,
+          time: Date.now()
+        });
+        localStorage.setItem(USAGE_KEY, JSON.stringify(records));
+      } catch (e) {}
+    }
+
+    // ====== Login handler ======
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const account = document.getElementById('loginAccount').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const btn = document.getElementById('loginBtn');
+
+      if (!account || !password) {
+        showToast('请输入账号和密码');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '登录中…';
+
+      // 延迟 300ms 给一点 loading 感
+      setTimeout(function() {
+        try {
+          const members = getMembers();
+          const user = members.find(function(m) {
+            return m.account === account && m.password === password;
+          });
+
+          if (!user) {
+            showToast('账号或密码错误');
+            btn.disabled = false;
+            btn.textContent = '登录';
+            return;
+          }
+
+          const userData = {
+            name: user.name,
+            account: user.account,
+            role: user.role,
+            loginAt: new Date().toISOString()
+          };
+          const serialized = JSON.stringify(userData);
+
+          if (rememberMe) {
+            // 持久登录: localStorage
+            localStorage.setItem(CURRENT_USER_KEY, serialized);
+            sessionStorage.removeItem(CURRENT_USER_KEY);
+          } else {
+            // 会话登录: sessionStorage
+            sessionStorage.setItem(CURRENT_USER_KEY, serialized);
+            localStorage.removeItem(CURRENT_USER_KEY);
+          }
+
+          // 记录每日登录奖励
+          recordLoginTokens(user);
+
+          btn.textContent = '登录成功';
+          showToast('登录成功，正在跳转…', 'success');
+          setTimeout(function() {
+            window.location.href = 'index.html';
+          }, 400);
+        } catch (err) {
+          showToast('登录失败，请重试');
+          btn.disabled = false;
+          btn.textContent = '登录';
+        }
+      }, 300);
+    }
+
+    // ====== 已有登录态时自动跳转主页 ======
+    (function autoRedirectIfLoggedIn() {
+      const stored = localStorage.getItem(CURRENT_USER_KEY) ||
+                     sessionStorage.getItem(CURRENT_USER_KEY);
+      if (stored) {
+        try {
+          JSON.parse(stored);
+          window.location.href = 'index.html';
+        } catch(e) {}
+      }
+    })();
+  </script>
+</body>
+</html>
