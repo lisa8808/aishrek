@@ -7,6 +7,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>AI-Shrek - 项目列表</title>
+  <script>
+    // ====== 鉴权拦截: 未登录跳转登录页 ======
+    (function() {
+      var CURRENT_USER_KEY = 'stl_current_user';
+      var stored = localStorage.getItem(CURRENT_USER_KEY) || sessionStorage.getItem(CURRENT_USER_KEY);
+      if (!stored) {
+        window.location.replace('login.html');
+        return;
+      }
+      try {
+        window.__currentUser = JSON.parse(stored);
+      } catch(e) {
+        localStorage.removeItem(CURRENT_USER_KEY);
+        sessionStorage.removeItem(CURRENT_USER_KEY);
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -138,6 +156,66 @@
       transition: all 0.15s;
     }
     .user-dropdown-item.clickable:hover { background: var(--primary-soft); color: #BFDBFE; }
+
+    /* CAD selection modal */
+    .cad-modal { width: 520px; max-width: 92vw; }
+    .cad-modal .modal-title { margin-bottom: 20px; }
+    .cad-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .cad-card {
+      padding: 18px 14px;
+      background: rgba(8,13,26,0.7);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+    .cad-card:hover {
+      border-color: var(--border-active);
+      background: rgba(37,99,235,0.08);
+      transform: translateY(-2px);
+    }
+    .cad-card.selected {
+      border-color: #60A5FA;
+      background: rgba(59,130,246,0.15);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.18);
+    }
+    .cad-card.selected::after {
+      content: '✓ 已选择';
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 10px;
+      color: #60A5FA;
+      font-weight: 600;
+    }
+    .cad-card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .cad-card-icon.sw { background: linear-gradient(135deg, #EF4444, #B91C1C); }
+    .cad-card-icon.catia { background: linear-gradient(135deg, #3B82F6, #1D4ED8); }
+    .cad-card-icon.ug { background: linear-gradient(135deg, #16A34A, #15803D); }
+    .cad-card-icon.creo { background: linear-gradient(135deg, #D97706, #B45309); }
+    .cad-card-name { font-size: 13px; color: #E2E8F0; font-weight: 600; }
+    .cad-card-desc { font-size: 11px; color: #94A3B8; text-align: center; line-height: 1.4; }
 
     /* Service cards */
     .svc-modal {
@@ -438,6 +516,275 @@
     }
     .modal-textarea:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* Computing Power Record */
+    .power-record-modal {
+      background: #1A1D23;
+      width: 800px;
+      max-width: 95vw;
+      height: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: relative;
+    }
+    .power-record-header {
+      padding: 32px 32px 20px;
+      flex-shrink: 0;
+    }
+    .power-record-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #FFFFFF;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .power-record-close:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .power-record-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-bottom: 24px;
+    }
+    .power-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .power-stat-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .power-stat-label {
+      font-size: 13px;
+      color: #8892B0;
+      margin-bottom: 8px;
+    }
+    .power-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #64FFDA;
+    }
+    .power-record-subtitle {
+      font-size: 16px;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+      margin-top: 16px;
+    }
+    .power-date-filter {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .power-date-label {
+      font-size: 14px;
+      color: #8892B0;
+      white-space: nowrap;
+    }
+    .power-date-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #FFFFFF;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.15s;
+    }
+    .power-date-input:focus {
+      border-color: #64FFDA;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .power-date-separator {
+      color: #8892B0;
+      font-size: 14px;
+    }
+    .power-date-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 6px 14px;
+      color: #8892B0;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .power-date-btn:hover {
+      border-color: #64FFDA;
+      color: #64FFDA;
+    }
+    .power-record-tabs {
+      display: flex;
+      gap: 32px;
+    }
+    .power-record-tab {
+      font-size: 14px;
+      font-weight: 400;
+      color: #B0B6C0;
+      cursor: pointer;
+      padding-bottom: 8px;
+      transition: all 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+    .power-record-tab.active {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+    .power-record-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 32px 20px;
+    }
+
+    .power-record-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .power-record-header-row {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .power-record-th {
+      padding: 16px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .power-record-th:first-child { padding-left: 20px; }
+    .power-record-th:last-child { padding-right: 20px; text-align: right; }
+
+    .power-record-row {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s;
+    }
+
+    .power-record-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .power-record-td {
+      padding: 16px 12px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .power-record-td:first-child { padding-left: 20px; }
+    .power-record-td:last-child { padding-right: 20px; text-align: right; }
+
+    .power-record-direction {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .power-record-direction.gain {
+      background: rgba(46, 213, 224, 0.15);
+      color: #2ed5e0;
+    }
+
+    .power-record-direction.consume {
+      background: rgba(255, 107, 129, 0.15);
+      color: #ff6b81;
+    }
+
+    .power-record-amount {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .power-record-amount.gain {
+      color: #2ed5e0;
+    }
+
+    .power-record-amount.consume {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .power-record-card {
+      background: #272B33;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .power-record-card-info {
+      flex: 1;
+    }
+    .power-record-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+    .power-record-card-subtitle {
+      font-size: 13px;
+      color: #B0B6C0;
+    }
+    .power-record-card-meta {
+      display: flex;
+      gap: 32px;
+      margin-right: 24px;
+    }
+    .power-record-card-meta-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .power-record-card-meta-label {
+      font-size: 11px;
+      color: #B0B6C0;
+      margin-bottom: 4px;
+    }
+    .power-record-card-meta-value {
+      font-size: 13px;
+      color: #D1D6E0;
+    }
+    .power-record-card-value {
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 80px;
+      text-align: right;
+    }
+    .power-record-card-value.gain {
+      color: #19D8E0;
+    }
+    .power-record-card-value.consume {
+      color: #FFFFFF;
+    }
+    .power-record-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #B0B6C0;
+      font-size: 14px;
+    }
     .modal-btn {
       padding: 7px 18px; border-radius: 8px; border: none;
       font-size: 12px; cursor: pointer; transition: all 0.15s;
@@ -488,8 +835,8 @@
     </div>
     <div class="header-right">
       <div class="user-area" onclick="toggleUserDropdown(event)">
-        <div class="user-avatar" id="userAvatar">U</div>
-        <div class="user-name">Jack</div>
+         <div class="user-avatar" id="userAvatar"></div>
+         <div class="user-name" id="userName"></div>
       </div>
     </div>
   </header>
@@ -498,9 +845,10 @@
   <div class="user-dropdown" id="userDropdown">
     <div class="user-dropdown-section" style="border-bottom:0;">
       <div class="user-dropdown-item clickable" onclick="showAccountModal()">👤 账户信息</div>
-      <div class="user-dropdown-item clickable" onclick="showModelModal()">⚙️ 模型设置</div>
+      <div class="user-dropdown-item clickable" onclick="showUsageTrackModal()">📊 使用轨迹</div>
+      <div class="user-dropdown-item clickable" onclick="showCADModal()">🔗 设计联动</div>
       <div class="user-dropdown-item clickable" onclick="showServiceModal()">⭐ 增值服务</div>
-      <div class="user-dropdown-item clickable" onclick="showMemberModal()">👥 成员管理</div>
+      <div class="user-dropdown-item clickable" id="memberMgmtItem" onclick="showMemberModal()">👥 成员管理</div>
       <div class="user-dropdown-item clickable" onclick="logout()" style="color:#EF4444;">🚪 退出登录</div>
     </div>
   </div>
@@ -594,6 +942,36 @@
         <button class="modal-btn" style="background:transparent;border:1px solid #00C8FF;color:#00C8FF;margin-right:auto;" onclick="testAddModel()">测试连接</button>
         <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('addModelOverlay').classList.remove('show')">取消</button>
         <button class="modal-btn modal-btn-confirm" onclick="addModelRow()">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAD Design Integration Modal -->
+  <div class="modal-overlay" id="cadModalOverlay">
+    <div class="modal cad-modal" onclick="event.stopPropagation()">
+      <div class="modal-title">🔗 设计联动配置</div>
+      <div class="modal-label" style="margin-bottom:14px;color:var(--text-secondary);font-size:12px;">
+        选择一款 CAD 软件作为默认联动环境，项目文件可直接在对应软件中打开、导出与协作。
+      </div>
+      <div class="cad-grid" id="cadGrid">
+        <div class="cad-card" data-cad="solidworks" onclick="selectCAD('solidworks')">
+          <div class="cad-card-icon sw">SW</div>
+          <div class="cad-card-name">SolidWorks</div>
+          <div class="cad-card-desc">达索主流参数化CAD<br>机械/钣金/焊接设计</div>
+        </div>
+        <div class="cad-card" data-cad="ug" onclick="selectCAD('ug')">
+          <div class="cad-card-icon ug">NX</div>
+          <div class="cad-card-name">UG (NX)</div>
+          <div class="cad-card-desc">西门子旗舰CAD/CAM/CAE<br>复杂曲面与制造</div>
+        </div>
+        <div class="cad-card" data-cad="creo" onclick="selectCAD('creo')">
+          <div class="cad-card-icon creo">P</div>
+          <div class="cad-card-name">CREO</div>
+          <div class="cad-card-desc">PTC参数化平台<br>多CAD兼容性强</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('cadModalOverlay').classList.remove('show')">关闭</button>
       </div>
     </div>
   </div>
@@ -756,6 +1134,45 @@
     </div>
   </div>
 
+  <!-- Computing Power Record Modal -->
+  <div class="modal-overlay" id="usageTrackModalOverlay">
+    <div class="power-record-modal">
+      <div class="power-record-header">
+        <button class="power-record-close" onclick="document.getElementById('usageTrackModalOverlay').classList.remove('show')">✕</button>
+         <div class="power-record-title">算力记录</div>
+         <div class="power-stats" id="powerStats">
+           <div class="power-stat-item">
+             <div class="power-stat-label">累计调用次数</div>
+             <div class="power-stat-value" id="statTotalCalls">0</div>
+           </div>
+           <div class="power-stat-item">
+             <div class="power-stat-label">累计使用额度</div>
+             <div class="power-stat-value" id="statTotalTokens">0</div>
+           </div>
+           <div class="power-stat-item">
+             <div class="power-stat-label">今日调用次数</div>
+             <div class="power-stat-value" id="statTodayCalls">0</div>
+           </div>
+           <div class="power-stat-item">
+             <div class="power-stat-label">今日使用额度</div>
+             <div class="power-stat-value" id="statTodayTokens">0</div>
+           </div>
+         </div>
+          <div class="power-date-filter">
+            <span class="power-date-label">时间范围</span>
+            <input type="date" id="dateRangeStart" class="power-date-input" onchange="applyDateFilter()">
+            <span class="power-date-separator">至</span>
+            <input type="date" id="dateRangeEnd" class="power-date-input" onchange="applyDateFilter()">
+            <button class="power-date-btn" onclick="clearDateFilter()">重置</button>
+          </div>
+          <div class="power-record-subtitle">消耗明细</div>
+      </div>
+      <div class="power-record-list" id="powerRecordList">
+        <div class="power-record-empty">暂无记录</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Service Auth Modal -->
   <div class="modal-overlay" id="authModalOverlay">
     <div class="auth-modal">
@@ -876,7 +1293,7 @@
           if (!key.startsWith('stl_upload_history_')) continue;
           // Skip version history keys
           if (key.startsWith('stl_version_history_')) continue;
-          
+
           var arr = JSON.parse(localStorage.getItem(key) || '[]');
           arr.forEach(function(e) {
             var name = (e.name || '').toLowerCase();
@@ -1190,6 +1607,359 @@
       renderMemberList();
     }
 
+    // --- Usage Track ---
+    var USAGE_TRACK_KEY = 'ai_shrek_usage_track';
+
+    function showUsageTrackModal() {
+      document.getElementById('userDropdown').classList.remove('show');
+      document.getElementById('usageTrackModalOverlay').classList.add('show');
+
+      // Initialize date inputs with last 30 days
+      var today = new Date();
+      var thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      var startInput = document.getElementById('dateRangeStart');
+      var endInput = document.getElementById('dateRangeEnd');
+
+      if (startInput && !startInput.value) {
+        startInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+      }
+      if (endInput && !endInput.value) {
+        endInput.value = today.toISOString().split('T')[0];
+      }
+
+      applyDateFilter();
+      renderConsumeStatistics();
+    }
+
+    function getSampleUsageRecords() {
+      var today = new Date();
+      return [
+        { type: 'creation', project: '减速器外壳设计', creativeType: '通用建模', creativeDesc: '创建齿轮箱外壳，尺寸300x200x150mm', time: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 23).getTime(), tokens: 150 },
+        { type: 'creation', project: '减速器外壳设计', creativeType: '原生精密', creativeDesc: '优化壁厚均匀性，添加安装孔位', time: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 15, 45).getTime(), tokens: 180 },
+        { type: 'creation', project: '传动轴组件', creativeType: '原生精密', creativeDesc: '设计阶梯轴，直径从30mm渐变到45mm', time: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 30).getTime(), tokens: 120 },
+        { type: 'creation', project: '行星齿轮组', creativeType: '参数化建模', creativeDesc: '生成模数2、齿数24的标准直齿轮', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()-1, 10, 15).getTime(), tokens: 200 },
+        { type: 'creation', project: '行星齿轮组', creativeType: '装配设计', creativeDesc: '创建3个行星轮与太阳轮的啮合装配', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()-1, 11, 30).getTime(), tokens: 250 },
+        { type: 'creation', project: '液压缸体', creativeType: '通用建模', creativeDesc: '设计双作用液压缸，行程200mm', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()-2, 9, 45).getTime(), tokens: 180 },
+        { type: 'creation', project: '液压缸体', creativeType: '仿真分析', creativeDesc: '进行静态应力分析，施加10MPa内压', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()-2, 14, 20).getTime(), tokens: 300 },
+        { type: 'login', project: '-', creativeType: '-', creativeDesc: '每日登录奖励', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime(), tokens: 500 },
+        { type: 'expired', project: '-', creativeType: '-', creativeDesc: '月度额度失效', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()-7).getTime(), tokens: 1000 },
+        { type: 'topup', project: '-', creativeType: '-', creativeDesc: '购买专业版额度包', time: new Date(today.getFullYear(), today.getMonth(), today.getDate()-3).getTime(), tokens: 5000 }
+      ];
+    }
+
+    function getUsageRecords() {
+      // Always return hardcoded sample data first
+      return getSampleUsageRecords();
+    }
+
+    function saveUsageRecords(records) {
+      try { localStorage.setItem(USAGE_TRACK_KEY, JSON.stringify(records)); } catch (e) {}
+    }
+
+    // Public API: add a usage record (called from workspace.html when tokens are consumed)
+    window.addUsageRecord = function(record) {
+      var records = getUsageRecords();
+      record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      record.time = record.time || Date.now();
+      records.unshift(record);
+      // Keep most recent 200 records
+      if (records.length > 200) records = records.slice(0, 200);
+      saveUsageRecords(records);
+    };
+
+    var USAGE_TRACK_KEY = 'ai_shrek_usage_track';
+
+    function formatPowerTime(ts) {
+      var d = new Date(ts);
+      return d.getFullYear() + '.'
+        + String(d.getMonth() + 1).padStart(2, '0') + '.'
+        + String(d.getDate()).padStart(2, '0') + ' '
+        + String(d.getHours()).padStart(2, '0') + ':'
+        + String(d.getMinutes()).padStart(2, '0') + ':'
+        + String(d.getSeconds()).padStart(2, '0');
+    }
+
+    function renderPowerRecordCard(rec) {
+      var type = rec.type || 'generate';
+
+      // 分类 1：获得流水（每日登录赠送 40）
+      if (type === 'login') {
+        return '<div class="power-record-card" data-type="gain">'
+          + '<div class="power-record-card-info">'
+          + '<div class="power-record-card-title">每日登录赠送</div>'
+          + '</div>'
+          + '<div class="power-record-card-meta">'
+          + '<div class="power-record-card-meta-item">'
+          + '<div class="power-record-card-meta-label">交易类型</div>'
+          + '<div class="power-record-card-meta-value" style="color:#19D8E0;">获得</div>'
+          + '</div>'
+          + '<div class="power-record-card-meta-item">'
+          + '<div class="power-record-card-meta-label">赠送日期</div>'
+          + '<div class="power-record-card-meta-value">' + formatPowerTime(rec.time) + '</div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="power-record-card-value gain">+' + (rec.tokens || 40) + '</div>'
+          + '</div>';
+      }
+
+      // 分类 3：算力到期扣减
+      if (type === 'expired') {
+        return '<div class="power-record-card" data-type="consume">'
+          + '<div class="power-record-card-info">'
+          + '<div class="power-record-card-title">算力到期</div>'
+          + '</div>'
+          + '<div class="power-record-card-meta">'
+          + '<div class="power-record-card-meta-item">'
+          + '<div class="power-record-card-meta-label">交易类型</div>'
+          + '<div class="power-record-card-meta-value" style="color:#FFFFFF;">消耗</div>'
+          + '</div>'
+          + '<div class="power-record-card-meta-item">'
+          + '<div class="power-record-card-meta-label">失效时间</div>'
+          + '<div class="power-record-card-meta-value">' + formatPowerTime(rec.time) + '</div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="power-record-card-value consume">-' + (rec.tokens || 10) + '</div>'
+          + '</div>';
+      }
+
+      // 分类 2：算力消耗（默认）
+      var project = rec.project || '无标题 - 61';
+      return '<div class="power-record-card" data-type="consume">'
+        + '<div class="power-record-card-info">'
+        + '<div class="power-record-card-title">算力消耗</div>'
+        + '</div>'
+        + '<div class="power-record-card-meta">'
+        + '<div class="power-record-card-meta-item">'
+        + '<div class="power-record-card-meta-label">交易类型</div>'
+        + '<div class="power-record-card-meta-value" style="color:#FFFFFF;">消耗</div>'
+        + '</div>'
+        + '<div class="power-record-card-meta-item">'
+        + '<div class="power-record-card-meta-label">关联项目</div>'
+        + '<div class="power-record-card-meta-value">' + escapeHtml(project) + '</div>'
+        + '</div>'
+        + '<div class="power-record-card-meta-item">'
+        + '<div class="power-record-card-meta-label">创建时间</div>'
+        + '<div class="power-record-card-meta-value">' + formatPowerTime(rec.time) + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="power-record-card-value consume">-' + (rec.tokens || 20) + '</div>'
+        + '</div>';
+    }
+
+    function renderPowerRecordTable(records) {
+      if (records.length === 0) {
+        return '<div class="power-record-empty">暂无记录</div>';
+      }
+
+      var html = '<table class="power-record-table">';
+      html += '<thead>';
+      html += '<tr class="power-record-header-row">';
+      html += '<th class="power-record-th">方向</th>';
+      html += '<th class="power-record-th">关联项目</th>';
+      html += '<th class="power-record-th">交易时间</th>';
+      html += '<th class="power-record-th">交易额度</th>';
+      html += '</tr>';
+      html += '</thead>';
+      html += '<tbody>';
+
+      records.forEach(function(rec) {
+        var type = rec.type || 'generate';
+        var direction = (type === 'login' || type === 'recharge') ? '获得' : '消费';
+        var directionClass = direction === '获得' ? 'gain' : 'consume';
+
+        var project = rec.project;
+        if (!project) {
+          if (type === 'login') project = '登录赠送';
+          else if (type === 'expired') project = '赠送到期';
+          else if (type === 'recharge') project = '充值';
+          else project = '-';
+        }
+
+        var timeStr = formatPowerTime(rec.time);
+        var amount = rec.tokens || 0;
+        var amountStr = (direction === '获得' && amount > 0 ? '+' : '') + amount;
+
+        html += '<tr class="power-record-row">';
+        html += '<td class="power-record-td"><span class="power-record-direction ' + directionClass + '">' + direction + '</span></td>';
+        html += '<td class="power-record-td">' + escapeHtml(project) + '</td>';
+        html += '<td class="power-record-td">' + timeStr + '</td>';
+        html += '<td class="power-record-td"><span class="power-record-amount ' + directionClass + '">' + amountStr + '</span></td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      return html;
+    }
+
+    function renderConsumeStatistics() {
+      var records = getSampleUsageRecords();
+
+      // Apply date filter
+      var startInput = document.getElementById('dateRangeStart');
+      var endInput = document.getElementById('dateRangeEnd');
+      var startDate = startInput && startInput.value ? new Date(startInput.value) : null;
+      var endDate = endInput && endInput.value ? new Date(endInput.value + ' 23:59:59') : null;
+
+      var consumeRecords = records.filter(function(r) {
+        if (r.type === 'login' || r.type === 'expired' || r.type === 'recharge') {
+          return false;
+        }
+
+        var recordDate = new Date(r.time);
+        if (startDate && recordDate < startDate) return false;
+        if (endDate && recordDate > endDate) return false;
+
+        return true;
+      });
+
+      var totalCalls = consumeRecords.length;
+      var totalTokens = consumeRecords.reduce(function(sum, r) {
+        return sum + (r.tokens || 0);
+      }, 0);
+
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var todayMs = today.getTime();
+
+      var todayCalls = consumeRecords.filter(function(r) {
+        return r.time >= todayMs;
+      }).length;
+
+      var todayTokens = consumeRecords.filter(function(r) {
+        return r.time >= todayMs;
+      }).reduce(function(sum, r) {
+        return sum + (r.tokens || 0);
+      }, 0);
+
+      document.getElementById('statTotalCalls').textContent = totalCalls;
+      document.getElementById('statTotalTokens').textContent = totalTokens;
+      document.getElementById('statTodayCalls').textContent = todayCalls;
+      document.getElementById('statTodayTokens').textContent = todayTokens;
+    }
+
+    function renderConsumeRecordTable(records) {
+      if (records.length === 0) {
+        return '<div class="power-record-empty">暂无消耗记录</div>';
+      }
+
+      var html = '<table class="power-record-table">';
+      html += '<thead>';
+      html += '<tr class="power-record-header-row">';
+      html += '<th class="power-record-th">项目名称</th>';
+      html += '<th class="power-record-th">创作类型</th>';
+      html += '<th class="power-record-th">创作描述</th>';
+      html += '<th class="power-record-th">创建时间</th>';
+      html += '<th class="power-record-th">额度</th>';
+      html += '</tr>';
+      html += '</thead>';
+      html += '<tbody>';
+
+      records.forEach(function(rec) {
+        var timeStr = formatPowerTime(rec.time);
+        var tokens = rec.tokens || 0;
+        var tokensStr = tokens < 0 ? tokens : '-' + tokens;
+
+        html += '<tr class="power-record-row">';
+        html += '<td class="power-record-td">' + escapeHtml(rec.project || '-') + '</td>';
+        html += '<td class="power-record-td">' + escapeHtml(rec.creativeType || '-') + '</td>';
+        html += '<td class="power-record-td">' + escapeHtml(rec.creativeDesc || '-') + '</td>';
+        html += '<td class="power-record-td">' + timeStr + '</td>';
+        html += '<td class="power-record-td"><span class="power-record-amount consume">' + tokensStr + '</span></td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      return html;
+    }
+
+    function clearDateFilter() {
+      var startInput = document.getElementById('dateRangeStart');
+      var endInput = document.getElementById('dateRangeEnd');
+      if (startInput) startInput.value = '';
+      if (endInput) endInput.value = '';
+      renderConsumeRecords();
+    }
+
+    function applyDateFilter() {
+      var startInput = document.getElementById('dateRangeStart');
+      var endInput = document.getElementById('dateRangeEnd');
+
+      var startDate = startInput.value ? new Date(startInput.value) : null;
+      var endDate = endInput.value ? new Date(endInput.value + ' 23:59:59') : null;
+
+      var records = getSampleUsageRecords();
+      var filteredRecords = records.filter(function(r) {
+        if (r.type === 'login' || r.type === 'expired' || r.type === 'recharge') {
+          return false;
+        }
+
+        var recordDate = new Date(r.time);
+
+        if (startDate && recordDate < startDate) {
+          return false;
+        }
+
+        if (endDate && recordDate > endDate) {
+          return false;
+        }
+
+        return true;
+      });
+
+      var listEl = document.getElementById('powerRecordList');
+      if (!listEl) return;
+      listEl.innerHTML = renderConsumeRecordTable(filteredRecords);
+    }
+
+    function renderConsumeRecords() {
+      var records = getSampleUsageRecords();
+      var filteredRecords = records.filter(function(r) {
+        return r.type !== 'login' && r.type !== 'expired' && r.type !== 'recharge';
+      });
+
+      var listEl = document.getElementById('powerRecordList');
+      if (!listEl) return;
+      listEl.innerHTML = renderConsumeRecordTable(filteredRecords);
+    }
+
+    // --- CAD Design Integration ---
+    var CAD_STORAGE_KEY = 'ai_shrek_selected_cad';
+    var CAD_OPTIONS = {
+      'solidworks': { name: 'SolidWorks', short: 'SW', iconClass: 'sw' },
+      'ug':         { name: 'UG (NX)',    short: 'NX', iconClass: 'ug' },
+      'creo':       { name: 'CREO',       short: 'P',  iconClass: 'creo' }
+    };
+
+    function getSelectedCAD() {
+      try { return localStorage.getItem(CAD_STORAGE_KEY); } catch (e) { return null; }
+    }
+
+    function showCADModal() {
+      document.getElementById('userDropdown').classList.remove('show');
+      document.getElementById('cadModalOverlay').classList.add('show');
+      refreshCADCardSelection();
+    }
+
+    function selectCAD(app) {
+      var current = getSelectedCAD();
+      var next = (current === app) ? null : app; // toggle off if re-clicked
+      try {
+        if (next) localStorage.setItem(CAD_STORAGE_KEY, next);
+        else localStorage.removeItem(CAD_STORAGE_KEY);
+      } catch (e) {}
+      refreshCADCardSelection();
+    }
+
+    function refreshCADCardSelection() {
+      var selected = getSelectedCAD();
+      document.querySelectorAll('#cadGrid .cad-card').forEach(function(card) {
+        var id = card.getAttribute('data-cad');
+        if (id === selected) card.classList.add('selected');
+        else card.classList.remove('selected');
+      });
+    }
+
     // Close modals on overlay click
     document.querySelectorAll('.modal-overlay').forEach(function(ov) {
       ov.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
@@ -1276,26 +2046,46 @@
 
     function renderMemberList() {
       var members = getMembers();
-      if (members.length === 0) {
-        members = [
-          { name: '张三', account: 'zhangsan@demo.com', role: '管理员', time: '2024-02-10' },
-          { name: '李四', account: 'lisi@demo.com', role: '成员', time: '2024-03-22' }
-        ];
-        saveMembers(members);
-      }
       var container = document.getElementById('memberList');
+      if (!container) return;
       container.innerHTML = '';
+      if (members.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#6B7280;font-size:12px;">暂无成员,请点击下方"添加成员"</div>';
+        return;
+      }
       members.forEach(function(m, idx) {
+        var bgColor = idx === 0 ? '#00C8FF' : idx === 1 ? '#FF6B6B' : '#A29BFE';
+        var hasPassword = !!(m.password);
+        var passwordDisplay = hasPassword
+          ? '<span class="member-pw" data-idx="' + idx + '" data-visible="0" style="color:#9CA3AF;cursor:pointer;min-width:80px;" onclick="toggleMemberPw(' + idx + ')">••••••</span>'
+          : '<span style="color:#6B7280;min-width:80px;font-style:italic;">未设置</span>';
         var div = document.createElement('div');
         div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:#0F1225;border-radius:8px;margin-bottom:4px;font-size:12px;';
-        div.innerHTML = '<span style="width:28px;height:28px;border-radius:50%;background:' + (idx===0?'#00C8FF':idx===1?'#FF6B6B':'#A29BFE') + ';display:flex;align-items:center;justify-content:center;font-size:11px;">' + m.name.charAt(0) + '</span>'
+        div.innerHTML = '<span style="width:28px;height:28px;border-radius:50%;background:' + bgColor + ';display:flex;align-items:center;justify-content:center;font-size:11px;">' + escapeHtml((m.name || '?').charAt(0)) + '</span>'
           + '<span style="flex:1;color:#E5E7EB;">' + escapeHtml(m.name) + '</span>'
           + '<span style="color:#6B7280;min-width:100px;">' + escapeHtml(m.account) + '</span>'
+          + passwordDisplay
           + '<span style="color:#00C8FF;min-width:50px;">' + escapeHtml(m.role) + '</span>'
           + '<span style="color:#9CA3AF;cursor:pointer;font-size:11px;" onclick="editMember(' + idx + ')">编辑</span>'
           + '<span style="margin-left:8px;color:#EF4444;cursor:pointer;font-size:11px;" onclick="deleteMember(' + idx + ')">删除</span>';
         container.appendChild(div);
       });
+    }
+    // 临时展开/隐藏成员密码
+    function toggleMemberPw(idx) {
+      var members = getMembers();
+      var m = members[idx];
+      if (!m) return;
+      var el = document.querySelector('.member-pw[data-idx="' + idx + '"]');
+      if (!el) return;
+      var visible = el.getAttribute('data-visible') === '1';
+      if (visible) {
+        el.textContent = '••••••';
+        el.setAttribute('data-visible', '0');
+      } else {
+        el.textContent = m.password || '(空)';
+        el.setAttribute('data-visible', '1');
+      }
     }
     function showAddMemberForm() {
       document.getElementById('addMemberOverlay').classList.add('show');
@@ -1303,11 +2093,30 @@
     function addMember() {
       var name = document.getElementById('newMemberName').value.trim();
       var account = document.getElementById('newMemberAccount').value.trim();
-      var password = document.getElementById('newMemberPassword').value.trim();
+      var password = document.getElementById('newMemberPassword').value;
       var role = document.getElementById('newMemberRole').value;
-      if (!name || !account) return;
+      if (!name || !account) {
+        alert('用户名和账号不能为空');
+        return;
+      }
+      if (!password) {
+        alert('密码不能为空');
+        return;
+      }
       var members = getMembers();
-      members.push({ name: name, account: account, role: role, time: new Date().toISOString().slice(0,10) });
+      // 账号唯一性检查
+      var exists = members.some(function(m) { return m.account === account; });
+      if (exists) {
+        alert('该账号已存在,请换一个账号');
+        return;
+      }
+      members.push({
+        name: name,
+        account: account,
+        password: password,
+        role: role,
+        time: new Date().toISOString().slice(0,10)
+      });
       saveMembers(members);
       document.getElementById('newMemberName').value = '';
       document.getElementById('newMemberAccount').value = '';
@@ -1317,6 +2126,15 @@
     }
     function deleteMember(idx) {
       var members = getMembers();
+      var m = members[idx];
+      if (!m) return;
+      // 防止删除当前登录的用户
+      var current = window.__currentUser;
+      if (current && m.account === current.account) {
+        alert('不能删除当前登录的账号,请先退出登录或切换账号后再删除');
+        return;
+      }
+      if (!confirm('确定删除成员 ' + m.name + ' (' + m.account + ') ?')) return;
       members.splice(idx, 1);
       saveMembers(members);
       renderMemberList();
@@ -1329,10 +2147,23 @@
       if (newName === null) return;
       var newAccount = prompt('账号', m.account);
       if (newAccount === null) return;
-      var newRole = prompt('角色（管理员/成员）', m.role);
+      var newPassword = prompt('密码(留空则保持原密码)', '');
+      if (newPassword === null) return;
+      var newRole = prompt('角色(管理员/成员)', m.role);
       if (newRole === null) return;
       if (newName.trim()) m.name = newName.trim();
-      if (newAccount.trim()) m.account = newAccount.trim();
+      if (newAccount.trim()) {
+        // 账号唯一性检查(排除自身)
+        var duplicate = members.some(function(other, j) {
+          return j !== idx && other.account === newAccount.trim();
+        });
+        if (duplicate) {
+          alert('该账号已被其他成员使用,保持原账号');
+        } else {
+          m.account = newAccount.trim();
+        }
+      }
+      if (newPassword.length > 0) m.password = newPassword;
       if (newRole.trim() === '管理员' || newRole.trim() === '成员') m.role = newRole.trim();
       saveMembers(members);
       renderMemberList();
@@ -1340,9 +2171,30 @@
     function logout() {
       document.getElementById('userDropdown').classList.remove('show');
       if (confirm('确定退出登录？')) {
-        alert('已退出登录');
+        localStorage.removeItem('stl_current_user');
+        sessionStorage.removeItem('stl_current_user');
+        window.location.href = 'login.html';
       }
     }
+
+    // --- 当前用户 Header 渲染 + 角色控制 ---
+    function applyCurrentUserUI() {
+      var user = window.__currentUser;
+      if (!user) return;
+      var avatarEl = document.getElementById('userAvatar');
+      var nameEl = document.getElementById('userName');
+      if (avatarEl) avatarEl.textContent = (user.name || user.account || 'U').charAt(0).toUpperCase();
+      if (nameEl) nameEl.textContent = user.name || user.account || '未命名';
+      // 非管理员隐藏「成员管理」入口
+      var mmItem = document.getElementById('memberMgmtItem');
+      if (mmItem) {
+        mmItem.style.display = (user.role === '管理员') ? '' : 'none';
+      }
+    }
+    // 立即执行一次，确保 Header 在 DOM 加载后即可渲染
+    applyCurrentUserUI();
+    // 兜底：如果上述脚本早于 DOM 渲染，再在 DOMContentLoaded 时跑一次
+    document.addEventListener('DOMContentLoaded', applyCurrentUserUI);
 
     // --- Service Auth ---
     function openAuthModal() {

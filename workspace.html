@@ -7,6 +7,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>AI-Shrek</title>
+  <script>
+    // ====== 鉴权拦截: 未登录跳转登录页 ======
+    (function() {
+      var CURRENT_USER_KEY = 'stl_current_user';
+      var stored = localStorage.getItem(CURRENT_USER_KEY) || sessionStorage.getItem(CURRENT_USER_KEY);
+      if (!stored) {
+        window.location.replace('login.html');
+        return;
+      }
+      try {
+        window.__currentUser = JSON.parse(stored);
+      } catch(e) {
+        localStorage.removeItem(CURRENT_USER_KEY);
+        sessionStorage.removeItem(CURRENT_USER_KEY);
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -188,6 +206,7 @@
     /* ===== Left: Upload History ===== */
     .file-list {
       flex: 1;
+      min-height: 80px;
       overflow-y: auto;
       padding: 0 8px;
     }
@@ -779,7 +798,7 @@
         <div class="upload-area" id="uploadArea0" onclick="document.getElementById('fileInput').click()">
           <div class="upload-icon">⚙️</div>
           <div class="upload-text">拖入或点击上传</div>
-          <div class="upload-hint">支持 STL/PLY/OBJ/3MF、STEP/IGES、PDF、图片工程图，最大 10MB</div>
+          <div class="upload-hint">支持 STL、STEP、PDF、JPG、PNG 格式，最大 10MB</div>
         </div>
         <div class="loading" id="loading0"><div class="spinner"></div></div>
         <div class="file-list" id="fileList0"><div class="file-list-empty">暂无上传记录</div></div>
@@ -788,7 +807,7 @@
         <div class="upload-area" id="uploadArea1" onclick="document.getElementById('fileInput').click()">
           <div class="upload-icon">🔧</div>
           <div class="upload-text">拖入或点击上传</div>
-          <div class="upload-hint">支持 PRT/ASM、DRW/DWG/DXF、PDF、图片工程图，最大 10MB</div>
+          <div class="upload-hint">支持 PRT、ASM、STEP 格式（原生CAD文件），最大 10MB</div>
         </div>
         <div class="loading" id="loading1"><div class="spinner"></div></div>
         <div class="file-list" id="fileList1"><div class="file-list-empty">暂无上传记录</div></div>
@@ -820,10 +839,11 @@
           <button class="preview-btn" onclick="setView('front')">前视图</button>
           <button class="preview-btn" onclick="setView('top')">俯视图</button>
           <button class="preview-btn" onclick="setView('right')">右视图</button>
-          <span style="width:6px;display:inline-block"></span>
-          <button class="preview-btn" id="btn-dots" onclick="toggleDots()">标记</button>
-          <button class="preview-btn" id="btn-original" onclick="toggleOriginal()">回到原稿</button>
-          <button class="preview-btn" id="btn-fullscreen" onclick="togglePreviewFullscreen()">全屏</button>
+           <span style="width:6px;display:inline-block"></span>
+           <button class="preview-btn" id="btn-dots" onclick="toggleDots()">标记</button>
+           <button class="preview-btn" id="btn-original" onclick="toggleOriginal()">回到原稿</button>
+            <button class="preview-btn" id="btn-explode" onclick="toggleExplodeAssembly()" style="display:none">💥 爆炸视图</button>
+           <button class="preview-btn" id="btn-fullscreen" onclick="togglePreviewFullscreen()">全屏</button>
         </div>
         <div class="coord-info-panel" id="coordInfoPanel" style="display:none">
           <div class="coord-info-title">📐 Coordinate Inspector</div>
@@ -841,9 +861,9 @@
         </div>
         <div class="chat-input-area">
           <div class="chat-tools-row" id="chatToolsRow">
-            <button class="preview-btn" id="btn-export-drawing" onclick="exportDrawing()" style="font-size:10px;padding:3px 10px;">📐 导出平面图</button>
-            <button class="preview-btn" id="btn-sim-structure" onclick="triggerStructureSim()" style="font-size:10px;padding:3px 10px;">⚙️ 结构仿真</button>
-            <button class="preview-btn" id="btn-sim-mechanism" onclick="triggerMechanismSim()" style="font-size:10px;padding:3px 10px;">🔧 动力学仿真</button>
+             <button class="preview-btn" id="btn-export-drawing" onclick="exportDrawing()" style="display:none;font-size:10px;padding:3px 10px;">📐 导出平面图</button>
+             <button class="preview-btn" id="btn-sim-structure" onclick="triggerStructureSim()" style="display:none;font-size:10px;padding:3px 10px;">⚙️ 结构仿真</button>
+             <button class="preview-btn" id="btn-sim-mechanism" onclick="triggerMechanismSim()" style="display:none;font-size:10px;padding:3px 10px;">🔧 动力学仿真</button>
           </div>
           <div class="chat-input-row">
             <select class="chat-mode-select" id="chatModeSelect">
@@ -875,7 +895,7 @@
     </div>
   </div>
 
-  <input type="file" id="fileInput" accept=".stl,.ply,.obj,.3mf,.step,.stp,.iges,.igs,.prt,.asm,.drw,.dwg,.dxf,.pdf,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,application/sla,model/stl,model/step,image/*,application/pdf">
+  <input type="file" id="fileInput">
 
   <!-- Three.js via CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
@@ -885,22 +905,22 @@
   <!-- CSG.js - Evan Wallace's Constructive Solid Geometry library -->
   <script src="https://evanw.github.io/csg.js/csg.js"></script>
 
-  <!-- OCCT for STEP file import -->
-  <script src="https://cdn.jsdelivr.net/npm/occt-import-js@0.0.23/dist/occt-import-js.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+   <!-- OCCT for STEP file import -->
+   <script src="https://cdn.jsdelivr.net/npm/occt-import-js@0.0.23/dist/occt-import-js.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
     // Global Three.js variables
     let scene, camera, renderer, controls, currentMesh;
     let isInitialized = false;
-    
+
     // Original file snapshot for "回到原稿"
     let originalSnapshot = null;
-    
+
     // For version preview switching: backup current live state
     let liveStateBackup = null;
     let previewingVersionId = null;
-    
+
     // Undo history stack: saves geometry + transform snapshots
     const undoStack = [];
     const MAX_UNDO = 20;
@@ -909,16 +929,39 @@
     let activeDesignTab = 'zhongxing';
     const DESIGN_TABS = ['zhongxing', 'jingmi', 'quanyu'];
 
-    function switchDesignTab(tabId) {
+     function switchDesignTab(tabId) {
+      var prevTab = activeDesignTab;
       activeDesignTab = tabId;
+
+      // Update tab button states
       document.querySelectorAll('#designTabBar .tab-btn').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.tab === tabId);
       });
+
+      // Show/hide tab content panels
       document.querySelectorAll('.panel-left .tab-content').forEach(function(tc) {
         tc.classList.toggle('active', tc.id === 'tab-' + tabId);
       });
-      // 导出平面图/结构仿真/动力学仿真在所有tab均显示
-      var disp = '';
+
+      // Set file input accept attribute based on tab
+      var fileInput = document.getElementById('fileInput');
+      if (fileInput) {
+        if (tabId === 'zhongxing') {
+          // 通用建模: stl, step, pdf, jpg, png
+          fileInput.accept = '.stl,.step,.stp,.pdf,.jpg,.jpeg,.png';
+        } else if (tabId === 'jingmi') {
+          // 原生精密: prt, asm, step, stp
+          fileInput.accept = '.prt,.asm,.step,.stp';
+        } else if (tabId === 'quanyu') {
+          // 全域设计: all formats
+          fileInput.accept = '.stl,.ply,.obj,.3mf,.step,.stp,.iges,.igs,.prt,.asm,.drw,.dwg,.dxf,.pdf,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff';
+        }
+      }
+      document.querySelectorAll('.panel-left .tab-content').forEach(function(tc) {
+        tc.classList.toggle('active', tc.id === 'tab-' + tabId);
+      });
+       // 导出平面图/结构仿真/动力学仿真仅在原生精密(jingmi)和全域设计(quanyu)显示
+       var disp = (tabId === 'zhongxing') ? 'none' : '';
       var btnDrawing = document.getElementById('btn-export-drawing');
       var btnSimSt = document.getElementById('btn-sim-structure');
       var btnSimMech = document.getElementById('btn-sim-mechanism');
@@ -927,10 +970,7 @@
       if (btnSimMech) btnSimMech.style.display = disp;
 
       if (tabId === 'jingmi' && currentMesh && scene) {
-        scene.remove(currentMesh);
-        if (currentMesh.geometry) currentMesh.geometry.dispose();
-        if (currentMesh.material) currentMesh.material.dispose();
-        currentMesh = null;
+        disposeCurrentModel();
         cleanupRuntimeSnapshots();
         clearDotMarkers && clearDotMarkers();
       }
@@ -977,7 +1017,7 @@ function toggleHistoryOverlay() {
       panelRight.style.display = isHidden ? 'flex' : 'none';
       mainContainer.classList.toggle('with-history', isHidden);
       if (btn) btn.classList.toggle('active', isHidden);
-      
+
       // Wait for layout to settle, then recalculate canvas size
       requestAnimationFrame(function() {
         requestAnimationFrame(function() {
@@ -985,7 +1025,7 @@ function toggleHistoryOverlay() {
         });
       });
 }
-    
+
     function saveUndoState() {
       if (!currentMesh) return;
       const geo = currentMesh.geometry.clone();
@@ -1006,7 +1046,7 @@ function toggleHistoryOverlay() {
       }
       console.log('Undo state saved, stack size:', undoStack.length);
     }
-    
+
     function undo() {
       if (undoStack.length === 0 || !currentMesh) {
         return '没有可撤销的操作';
@@ -1062,7 +1102,7 @@ function toggleHistoryOverlay() {
       const container = document.getElementById('previewArea');
       canvas.style.display = 'block';
       console.log('[DEBUG] initThree canvas:', canvas.tagName, canvas.width, 'x', canvas.height, 'clientW/H:', canvas.clientWidth, canvas.clientHeight);
-      
+
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x1a1a2e);
@@ -1113,11 +1153,11 @@ function toggleHistoryOverlay() {
       // Lights
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambientLight);
-      
+
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
       directionalLight.position.set(50, 50, 50);
       scene.add(directionalLight);
-      
+
       const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
       directionalLight2.position.set(-50, -50, -50);
       scene.add(directionalLight2);
@@ -1145,7 +1185,7 @@ function toggleHistoryOverlay() {
 
       // Start animation loop
       animate();
-      
+
       isInitialized = true;
       console.log('Three.js initialized successfully');
     }
@@ -1194,6 +1234,16 @@ function toggleHistoryOverlay() {
         }
         pendingClick = null;
       }
+      // Animate assembly explode/collapse transition (smooth lerp)
+      if (asmGroup && asmExplodeCurrent !== asmExplodeTarget) {
+        var delta = (asmExplodeTarget - asmExplodeCurrent) * 0.12; // ease-out
+        if (Math.abs(delta) < 0.001) {
+          asmExplodeCurrent = asmExplodeTarget;
+        } else {
+          asmExplodeCurrent += delta;
+        }
+        applyAssemblyExplode();
+      }
       // Make rings always face camera
       if (camera && dotMarkers.length > 0) {
         dotMarkers.forEach(function(m) {
@@ -1209,39 +1259,35 @@ function toggleHistoryOverlay() {
 
     function loadSTL(file) {
       console.log('Loading STL file:', file.name);
-      
+
       const loader = new THREE.STLLoader();
-      
+
       // Read file as ArrayBuffer first
       const reader = new FileReader();
       reader.onload = function(event) {
         const arrayBuffer = event.target.result;
         console.log('File read as ArrayBuffer, size:', arrayBuffer.byteLength);
-        
+
         try {
           // Parse the STL data directly from ArrayBuffer
           const geometry = loader.parse(arrayBuffer);
           console.log('STL parsed successfully, triangle count:', geometry.attributes.position.count / 3);
-          
-          // Remove old mesh
-          if (currentMesh) {
-            scene.remove(currentMesh);
-            if (currentMesh.geometry) currentMesh.geometry.dispose();
-            if (currentMesh.material) currentMesh.material.dispose();
-          }
+
+          // Remove old mesh/group
+          disposeCurrentModel();
 
           // Calculate center and normalize
           geometry.computeBoundingBox();
           const center = new THREE.Vector3();
           geometry.boundingBox.getCenter(center);
           geometry.translate(-center.x, -center.y, -center.z);
-          
+
           const boundingBox = geometry.boundingBox;
           const size = new THREE.Vector3();
           boundingBox.getSize(size);
           const maxDim = Math.max(size.x, size.y, size.z);
           const scale = 80 / maxDim;
-          
+
           console.log('Mesh scale:', scale, 'maxDim:', maxDim);
 
           // Material
@@ -1259,25 +1305,26 @@ function toggleHistoryOverlay() {
 
           // Show controls
           document.getElementById('previewControls').style.display = 'flex';
-          
+          if (currentMesh.userData) currentMesh.userData.isASM = false;
+
           // Enable chat
           window.enableChat();
-          
+
           // Reset camera
           resetCamera();
-          
+
           console.log('STL rendered successfully');
         } catch (e) {
           console.error('Error parsing STL:', e);
           alert('Error parsing STL: ' + e.message);
         }
       };
-      
+
       reader.onerror = function(error) {
         console.error('Error reading file:', error);
         alert('Error reading file: ' + error);
       };
-      
+
       reader.readAsArrayBuffer(file);
     }
 
@@ -1315,7 +1362,37 @@ function toggleHistoryOverlay() {
     }
 
     let isDots = false;
+    // Assembly explode state: null = not in ASM mode, 'assembled' / 'exploded'
+    let asmGroup = null;        // Reference to the assembly group (if in ASM mode)
+    let asmExplodeTarget = 0;   // 0 = assembled, 1 = fully exploded
+    let asmExplodeCurrent = 0;  // Current lerp value (animated toward target)
+    let explodeButtonActive = false;
     let pendingClick = null;
+
+    // --- Usage tracking (synced with index.html's ai_shrek_usage_track) ---
+    var USAGE_TRACK_KEY = 'ai_shrek_usage_track';
+    function getCurrentProjectName() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var projectId = params.get('project');
+        if (!projectId) return '';
+        var projects = JSON.parse(localStorage.getItem('stl_projects') || '[]');
+        var proj = projects.find(function(p) { return p.id === projectId; });
+        return proj ? proj.name : '';
+      } catch (e) { return ''; }
+    }
+    function logUsage(record) {
+      try {
+        var records = JSON.parse(localStorage.getItem(USAGE_TRACK_KEY) || '[]');
+        record.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        record.time = record.time || Date.now();
+        record.project = record.project || getCurrentProjectName();
+        record.tokens = record.tokens || 0;
+        records.unshift(record);
+        if (records.length > 200) records = records.slice(0, 200);
+        localStorage.setItem(USAGE_TRACK_KEY, JSON.stringify(records));
+      } catch (e) { /* ignore */ }
+    }
     window.__getIsDots = function() { return isDots; };
     window.__getCurrentMesh = function() { return !!currentMesh; };
     window.__getHasRenderer = function() { return !!renderer; };
@@ -1335,29 +1412,29 @@ function toggleHistoryOverlay() {
         sphere.position.copy(point);
         sphere.renderOrder = 10;
         scene.add(sphere);
-        
+
         var line = null;
         if (dotMarkers.length > 0) {
           var lastPoint = dotMarkers[dotMarkers.length - 1].sphere.position.clone();
           var direction = new THREE.Vector3().subVectors(point, lastPoint);
           var distance = direction.length();
           direction.normalize();
-          
+
           var cylinderGeo = new THREE.CylinderGeometry(0.25, 0.25, distance, 12);
           var cylinderMat = new THREE.MeshBasicMaterial({ color: 0x00FFAA });
           line = new THREE.Mesh(cylinderGeo, cylinderMat);
           line.renderOrder = 9;
-          
+
           var midpoint = new THREE.Vector3().addVectors(lastPoint, point).multiplyScalar(0.5);
           line.position.copy(midpoint);
-          
+
           var up = new THREE.Vector3(0, 1, 0);
           var quaternion = new THREE.Quaternion().setFromUnitVectors(up, direction);
           line.quaternion.copy(quaternion);
-          
+
           scene.add(line);
         }
-        
+
         var coordStr = 'X:' + point.x.toFixed(2) + '  Y:' + point.y.toFixed(2) + '  Z:' + point.z.toFixed(2);
         dotMarkers.push({ sphere: sphere, line: line, coordString: coordStr, label: null });
       } catch(e) {
@@ -1494,8 +1571,8 @@ function toggleHistoryOverlay() {
       if (!panel) return;
       if (!currentMesh) { panel.innerHTML = '<span style="color:#64748b">No mesh loaded</span>'; return; }
 
-      currentMesh.geometry.computeBoundingBox();
-      var bb = currentMesh.geometry.boundingBox;
+      // Compute bounding box — works for both Mesh and Group
+      var bb = new THREE.Box3().setFromObject(currentMesh);
       var size = new THREE.Vector3();
       var center = new THREE.Vector3();
       bb.getSize(size);
@@ -1505,6 +1582,14 @@ function toggleHistoryOverlay() {
       var pickedStr = picked
         ? '(' + picked.x.toFixed(2) + ', ' + picked.y.toFixed(2) + ', ' + picked.z.toFixed(2) + ')'
         : 'click model surface';
+
+      // Count components if it's an assembly group
+      var partsCount = 0;
+      if (currentMesh.userData && currentMesh.userData.isAssembly && currentMesh.children) {
+        currentMesh.children.forEach(function (c) {
+          if (c.userData && c.userData.component) partsCount += 1;
+        });
+      }
 
       var html = '<div class="info-row"><span class="info-label">System</span><span class="info-value">CAD Z-up</span></div>'
         + '<div class="info-row"><span class="info-label">Axes</span><span class="info-value"><span class="red">X</span> red, <span class="green">Y</span> green, <span class="blue">Z</span> blue</span></div>'
@@ -1516,7 +1601,7 @@ function toggleHistoryOverlay() {
         + '<div class="info-row"><span class="info-label">Max</span><span class="info-value">(' + bb.max.x.toFixed(2) + ', ' + bb.max.y.toFixed(2) + ', ' + bb.max.z.toFixed(2) + ')</span></div>'
         + '<div class="info-row"><span class="info-label">Picked</span><span class="info-value cyan">' + pickedStr + '</span></div>'
         + '<div class="info-row"><span class="info-label">Picked count</span><span class="info-value">' + dotMarkers.length + '</span></div>'
-        + '<div class="info-row"><span class="info-label">Explode parts</span><span class="info-value">0</span></div>';
+        + '<div class="info-row"><span class="info-label">Explode parts</span><span class="info-value">' + partsCount + '</span></div>';
 
       // Add last distance and last label only when 2+ markers exist
       if (dotMarkers.length >= 2) {
@@ -1524,7 +1609,7 @@ function toggleHistoryOverlay() {
         var prevMarker = dotMarkers[dotMarkers.length - 2];
         var distance = lastMarker.sphere.position.distanceTo(prevMarker.sphere.position);
         var lastLabel = lastMarker.coordString || pickedStr;
-        
+
         html += '<div class="info-row" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(56,189,248,0.2)"><span class="info-label">Last distance</span><span class="info-value">' + distance.toFixed(2) + '</span></div>'
           + '<div class="info-row"><span class="info-label">Last label</span><span class="info-value">' + lastLabel + '</span></div>';
       }
@@ -1609,15 +1694,15 @@ function toggleHistoryOverlay() {
     });
 
     // Button event listeners
-    
+
     // ========== CHAT FUNCTIONALITY ==========
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
     const chatMessages = document.getElementById('chatMessages');
-    
+
     let chatHistory = [];
     let hasModel = false;
-    
+
     // Enable chat when model is loaded
     window.enableChat = function() {
       hasModel = true;
@@ -1641,18 +1726,18 @@ function toggleHistoryOverlay() {
       chatMessages.innerHTML = '';
       autoAnalyzeGeometry();
     };
-    
+
     function executeCommand(text) {
       // Add user message
       addChatMessage('user', text);
-      
+
       // Show thinking
       const thinkingMsg = document.createElement('div');
       thinkingMsg.className = 'chat-message assistant';
       thinkingMsg.textContent = '执行中...';
       chatMessages.appendChild(thinkingMsg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-      
+
       // Parse and execute
       setTimeout(() => {
         const result = parseLocalModification(text);
@@ -1660,7 +1745,7 @@ function toggleHistoryOverlay() {
         addChatMessage('assistant', result.message);
       }, 100);
     }
-    
+
     function addChatMessage(role, content, isInit, pdfUrl) {
       const empty = chatMessages.querySelector('.chat-empty');
       if (empty) empty.remove();
@@ -1686,18 +1771,18 @@ function toggleHistoryOverlay() {
 
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    
+
     async function sendMessage() {
       const text = chatInput.value.trim();
       console.log('Raw input:', text);
-      
+
       if (!text || !hasModel) return;
-      
+
       // Add user message
       addChatMessage('user', text);
       chatInput.value = '';
       chatHistory.push({ role: 'user', content: text });
-      
+
       // Show typing indicator
       const typingMsg = document.createElement('div');
       typingMsg.className = 'chat-message assistant';
@@ -1705,14 +1790,14 @@ function toggleHistoryOverlay() {
       typingMsg.id = 'typing-indicator';
       chatMessages.appendChild(typingMsg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-      
+
       // Try local parsing first for known patterns (fast + reliable)
       const localResult = parseLocalModification(text);
-      
+
       // Remove typing indicator
       const indicator = document.getElementById('typing-indicator');
       if (indicator) indicator.remove();
-      
+
       if (localResult.applied !== null && localResult.applied !== undefined) {
         // Local parsing matched a known command and already applied it
         addChatMessage('assistant', localResult.message);
@@ -1730,7 +1815,7 @@ function toggleHistoryOverlay() {
         }
       }
     }
-    
+
     // Call AI API for complex commands
     async function callAIAPI(command) {
       const apiConfig = {
@@ -1738,7 +1823,7 @@ function toggleHistoryOverlay() {
         url: 'https://open.palebluedot.ai/v1/chat/completions',
         model: 'anthropic/claude-opus-4.6'
       };
-      
+
       const systemPrompt = `你是AI机械制造设计专家。用户正在对三维零件模型进行参数化修改。
 所有尺寸单位为 mm，保留2位小数。
 
@@ -1808,12 +1893,31 @@ function toggleHistoryOverlay() {
 
         const data = await response.json();
         const aiResponse = data.choices?.[0]?.message?.content || '';
-        
+
+        // Track token usage if available from provider
+        var usageInfo = data.usage || {};
+        var totalTokens = (usageInfo.total_tokens || usageInfo.total || 0)
+          + (usageInfo.prompt_tokens || usageInfo.prompt || 0)
+          + (usageInfo.completion_tokens || usageInfo.completion || 0);
+        if (totalTokens > 0) {
+          logUsage({
+            type: 'chat',
+            desc: 'AI 对话: ' + command,
+            tokens: totalTokens
+          });
+        } else {
+          logUsage({
+            type: 'chat',
+            desc: 'AI 对话: ' + command,
+            tokens: 500
+          });
+        }
+
         console.log('AI Response:', aiResponse);
-        
+
         // Parse AI response
         return parseAIResponse(aiResponse, command);
-        
+
       } catch (error) {
         console.error('AI API error:', error);
         // Immediately fallback to local parsing instead of just returning failure
@@ -1821,7 +1925,7 @@ function toggleHistoryOverlay() {
         return { success: false, message: 'AI 服务暂时不可用，使用本地解析。' };
       }
     }
-    
+
     // Parse AI response and execute
     function parseAIResponse(aiResponse, originalCommand) {
       try {
@@ -1831,21 +1935,21 @@ function toggleHistoryOverlay() {
         if (jsonMatch) {
           jsonStr = jsonMatch[0];
         }
-        
+
         const operation = JSON.parse(jsonStr);
-        
+
         if (operation.operation === 'unsupported') {
           return { success: true, message: `AI 无法处理：${operation.reason}` };
         }
-        
+
         // Execute the operation
         const result = executeOperation(operation);
-        
+
         return {
           success: true,
           message: `✅ ${operation.description}\n\n执行结果：${result}`
         };
-        
+
       } catch (error) {
         console.error('Parse error:', error);
         // Fallback to local parsing
@@ -1853,14 +1957,14 @@ function toggleHistoryOverlay() {
         return { success: true, message: localResult.message };
       }
     }
-    
+
     // Execute parsed operation
     function executeOperation(op) {
       const { operation, params } = op;
       console.log('Executing operation:', operation, params);
-      
+
       let result = '操作执行完成';
-      
+
       switch (operation) {
         case 'scale':
           if (currentMesh) {
@@ -1880,7 +1984,7 @@ function toggleHistoryOverlay() {
             result = `缩放 ${(scaleRatio * 100).toFixed(0)}%`;
           }
           break;
-          
+
         case 'rotate':
           if (params.axis && params.angle && currentMesh) {
             const angle = params.angle * Math.PI / 180;
@@ -1891,14 +1995,14 @@ function toggleHistoryOverlay() {
             result = `绕 ${params.axis.toUpperCase()} 轴旋转 ${params.angle}°`;
           }
           break;
-          
+
         case 'hole':
         case 'boolean_subtract':
         case 'boolean_hole':
           // Handle different hole types from AI
           // AI might return string expressions like "model_width * 0.2" or numeric values
           let holeRadius = params.radius || params.diameter / 2 || 5;
-          
+
           // If it's a string like "model_width * 0.2", evaluate it
           if (typeof holeRadius === 'string') {
             const modelRadius = 40; // Default plate half-width
@@ -1910,9 +2014,9 @@ function toggleHistoryOverlay() {
               holeRadius = parseFloat(holeRadius) || 5;
             }
           }
-          
+
           const holeShape = params.shape || params.type || params.tool_shape || 'circle';
-          
+
           if (holeShape === 'circle' || holeShape === 'cylinder') {
             applyHole(currentMesh, holeRadius);
             currentMesh.geometry.computeVertexNormals();
@@ -1937,7 +2041,7 @@ function toggleHistoryOverlay() {
             result = `挖了直径 ${holeRadius * 2}mm 的圆孔`;
           }
           break;
-          
+
         case 'simplify':
           if (params.ratio && currentMesh) {
             simplifyMesh(currentMesh, params.ratio);
@@ -1946,7 +2050,7 @@ function toggleHistoryOverlay() {
             result = `简化至 ${params.ratio * 100}%`;
           }
           break;
-          
+
         case 'smooth':
           if (currentMesh) {
             smoothMesh(currentMesh);
@@ -1954,7 +2058,7 @@ function toggleHistoryOverlay() {
             result = '已平滑处理';
           }
           break;
-          
+
         case 'color':
         case 'change_color':
           if (currentMesh && params.color) {
@@ -1962,7 +2066,7 @@ function toggleHistoryOverlay() {
             if (!isNaN(colorHex)) { currentMesh.material.color.setHex(colorHex); result = '颜色已修改'; }
           }
           break;
-          
+
         case 'mirror':
         case 'flip':
           if (currentMesh) {
@@ -1974,7 +2078,7 @@ function toggleHistoryOverlay() {
             result = axis.toUpperCase() + '轴镜像';
           }
           break;
-          
+
         case 'move':
         case 'translate':
           if (currentMesh) {
@@ -1984,7 +2088,7 @@ function toggleHistoryOverlay() {
             result = '已移动';
           }
           break;
-          
+
         case 'stretch':
           if (currentMesh) {
             var sa = params.axis || 'y', sf2 = params.factor || 1.5;
@@ -1995,15 +2099,15 @@ function toggleHistoryOverlay() {
             result = sa.toUpperCase() + '轴拉伸 ' + sf2 + 'x';
           }
           break;
-          
+
         case 'wireframe':
           if (currentMesh) { currentMesh.material.wireframe = true; result = '线框模式'; }
           break;
-          
+
         case 'solid':
           if (currentMesh) { currentMesh.material.wireframe = false; result = '实体模式'; }
           break;
-          
+
         case 'transparency':
         case 'opacity':
           if (currentMesh) {
@@ -2015,28 +2119,28 @@ function toggleHistoryOverlay() {
             result = '透明度 ' + (op2*100).toFixed(0) + '%';
           }
           break;
-          
+
         case 'undo':
           result = undo();
           break;
-          
+
         default:
           result = '操作 "' + operation + '" 暂不支持';
       }
-      
+
       // Force render update
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
       }
-      
+
       // Record to version history
       if (result !== '操作执行完成') {
         addVersionRecord(result);
       }
-      
+
       return result;
     }
-    
+
     // Create a simple flat plate for testing hole operations
     window.createTestPlate = function() {
       // Remove existing mesh
@@ -2045,20 +2149,20 @@ function toggleHistoryOverlay() {
         currentMesh.geometry.dispose();
         currentMesh.material.dispose();
       }
-      
+
       // Create a flat plate (wide, short height) with subdivisions for CSG
       const width = 80;
       const height = 10;
       const depth = 80;
-      
+
       const geometry = new THREE.BoxGeometry(width, height, depth, 1, 1, 1);
-      
+
       const material = new THREE.MeshPhongMaterial({
         color: 0x296AFA,
         specular: 0x333333,
         shininess: 100
       });
-      
+
       currentMesh = new THREE.Mesh(geometry, material);
       scene.add(currentMesh);
 
@@ -2073,7 +2177,7 @@ function toggleHistoryOverlay() {
 
       console.log('Test plate created:', width, 'x', height, 'x', depth);
     };
-    
+
     // Color name -> hex mapping
     const COLOR_MAP = {
       '红': 0xff0000, '红色': 0xff0000, 'red': 0xff0000,
@@ -2090,11 +2194,11 @@ function toggleHistoryOverlay() {
       '银': 0xc0c0c0, '银色': 0xc0c0c0, 'silver': 0xc0c0c0,
       '青': 0x00d9ff, '青色': 0x00d9ff, 'cyan': 0x00d9ff,
     };
-    
+
     function parseLocalModification(text) {
       console.log('Parsing:', text);
       if (!currentMesh) return { message: '请先上传模型或创建测试板', applied: null };
-      
+
       let actions = [];
       const numMatch = text.match(/(\d+(?:\.\d+)?)/);
       const num = numMatch ? parseFloat(numMatch[1]) : null;
@@ -2107,7 +2211,7 @@ function toggleHistoryOverlay() {
         while (undoStack.length > 0) undo();
         return { message: '已重置到初始状态', applied: true };
       }
-      
+
       // ====== HELP ======
       if (/帮助|help|指令|命令|怎么用|支持什么/.test(text)) {
         return {
@@ -2127,7 +2231,7 @@ function toggleHistoryOverlay() {
           applied: true
         };
       }
-      
+
       // ====== AI-SIMULATE (front-end engineering estimate) ======
       if (/仿真|静力|载荷|约束|材料|应力|位移|安全系数|simulate|simulation|fea|有限元/i.test(text)) {
         var sim = runStructureSimulationEstimate(text);
@@ -2139,7 +2243,7 @@ function toggleHistoryOverlay() {
         autoAnalyzeGeometry();
         return { message: '已输出几何分析报告', applied: true };
       }
-      
+
       // ====== INFO ======
       if (/信息|info|尺寸|大小|统计|顶点|面数/.test(text)) {
         var info = analyzeGeometry(currentMesh);
@@ -2154,10 +2258,10 @@ function toggleHistoryOverlay() {
           applied: true
         };
       }
-      
+
       // Save undo state before any destructive operation
       saveUndoState();
-      
+
       // ====== CHAMFER (倒角) ======
       if (/倒角|chamfer|C\d/.test(text)) {
         var cSize = num || 2;
@@ -2167,7 +2271,7 @@ function toggleHistoryOverlay() {
         applyBoxHole(currentMesh, cSize * 0.5); // simplified
         return { message: '已应用：倒角 C' + cSize.toFixed(2) + 'mm（简化模拟）', applied: true };
       }
-      
+
       // ====== FILLET (圆角) ======
       else if (/圆角|fillet|R\d/.test(text) && !/旋转/.test(text)) {
         var rSize = num || 3;
@@ -2175,7 +2279,7 @@ function toggleHistoryOverlay() {
         applySphereHole(currentMesh, rSize * 0.3); // simplified
         return { message: '已应用：圆角 R' + rSize.toFixed(2) + 'mm（简化模拟）', applied: true };
       }
-      
+
       // ====== BOSS (凸台) ======
       else if (/凸台|boss|加台|加柱/.test(text)) {
         saveUndoState();
@@ -2209,7 +2313,7 @@ function toggleHistoryOverlay() {
         }
         actions.push('加凸台 Φ' + bDia.toFixed(2) + ' × H' + bHeight.toFixed(2) + 'mm');
       }
-      
+
       // ====== COUNTERBORE (沉头孔) ======
       else if (/沉头|counterbore|沉孔/.test(text)) {
         saveUndoState();
@@ -2235,7 +2339,7 @@ function toggleHistoryOverlay() {
         }
         actions.push('沉头孔 Φ' + cbHoleDia.toFixed(2) + ' / Φ' + cbDia.toFixed(2) + ' 深' + cbDepth.toFixed(2) + 'mm');
       }
-      
+
       // ====== Φ notation for holes: "Φ8通孔" "直径10通孔" ======
       else if (/[Φφ]\d|直径.*孔|通孔|盲孔/.test(text)) {
         var holeDia = num || 8;
@@ -2246,7 +2350,7 @@ function toggleHistoryOverlay() {
         var holeType = /盲/.test(text) ? '盲孔' : '通孔';
         actions.push(holeType + ' Φ' + holeDia.toFixed(2) + 'mm');
       }
-      
+
       // ====== BOOLEAN OPERATIONS (generic) ======
       else if (/方.*洞|方.*孔|方形.*孔/.test(text)) {
         applyBoxHole(currentMesh, num || 10);
@@ -2262,7 +2366,7 @@ function toggleHistoryOverlay() {
         applyHole(currentMesh, r);
         actions.push('圆孔 Φ' + (r*2) + 'mm');
       }
-      
+
       // ====== COLOR ======
       else if (/颜色|换色|改色|变色|涂|染|color/.test(text) || Object.keys(COLOR_MAP).some(function(c) { return text.includes(c); })) {
         var hex = null;
@@ -2276,7 +2380,7 @@ function toggleHistoryOverlay() {
           actions.push('未识别颜色，支持：红/绿/蓝/黄/橙/紫/粉/白/黑/灰/金/银/青 或 #hex');
         }
       }
-      
+
       // ====== TRANSPARENCY ======
       else if (/不透明|取消透明|opaque/.test(text)) {
         currentMesh.material.transparent = false;
@@ -2291,7 +2395,7 @@ function toggleHistoryOverlay() {
         currentMesh.material.needsUpdate = true;
         actions.push('透明度设为 ' + (op * 100).toFixed(0) + '%');
       }
-      
+
       // ====== WIREFRAME / SOLID ======
       else if (/线框|wireframe/.test(text)) {
         currentMesh.material.wireframe = true;
@@ -2301,7 +2405,7 @@ function toggleHistoryOverlay() {
         currentMesh.material.wireframe = false;
         actions.push('已切换为实体模式');
       }
-      
+
       // ====== MIRROR / FLIP ======
       else if (/镜像|翻转|flip|mirror/.test(text)) {
         var ms = currentMesh.scale;
@@ -2310,7 +2414,7 @@ function toggleHistoryOverlay() {
         else if (/前后|z/i.test(text)) { currentMesh.scale.set(ms.x, ms.y, ms.z * -1); actions.push('已前后镜像'); }
         else { currentMesh.scale.set(ms.x * -1, ms.y, ms.z); actions.push('已左右镜像'); }
       }
-      
+
       // ====== MOVE / TRANSLATE ======
       else if (/移动|平移|move|translate|向[上下左右前后]|往[上下左右前后]/.test(text)) {
         var d = num || 10;
@@ -2322,7 +2426,7 @@ function toggleHistoryOverlay() {
         else if (/后|back/i.test(text)) { currentMesh.position.z += d; actions.push('向后移动 ' + d); }
         else { actions.push('请指定方向：上/下/左/右/前/后'); }
       }
-      
+
       // ====== STRETCH / SQUASH ======
       else if (/拉伸|拉长|stretch|elongate/.test(text)) {
         var sf = num ? (num > 10 ? num / 100 : num) : 1.5;
@@ -2338,7 +2442,7 @@ function toggleHistoryOverlay() {
         else if (/z/i.test(text)) { currentMesh.scale.set(fs.x, fs.y, fs.z * ff); actions.push('Z轴压扁到 ' + (ff*100).toFixed(0) + '%'); }
         else { currentMesh.scale.set(fs.x, fs.y * ff, fs.z); actions.push('Y轴压扁到 ' + (ff*100).toFixed(0) + '%'); }
       }
-      
+
       // ====== SMOOTH / SIMPLIFY ======
       else if (/平滑|smooth|光滑/.test(text)) {
         smoothMesh(currentMesh);
@@ -2349,7 +2453,7 @@ function toggleHistoryOverlay() {
         simplifyMesh(currentMesh, sr);
         actions.push('已简化到 ' + (sr * 100).toFixed(0) + '%');
       }
-      
+
       // ====== DUPLICATE / ARRAY ======
       else if (/复制|克隆|duplicate|clone/.test(text)) {
         var cl = currentMesh.clone(); cl.material = currentMesh.material.clone(); cl.position.x += 50; scene.add(cl);
@@ -2360,7 +2464,7 @@ function toggleHistoryOverlay() {
         for (var ai = 1; ai <= cnt; ai++) { var ac = currentMesh.clone(); ac.material = currentMesh.material.clone(); ac.position.x += 50 * ai; scene.add(ac); }
         actions.push('已创建 ' + cnt + ' 个副本阵列');
       }
-      
+
       // ====== SCALE (uniform) ======
       else if (text.includes('%') || /放大|缩小|scale/.test(text) || text.includes('倍')) {
         var scaleMatch2 = text.match(/(\d+(?:\.\d+)?)\s*%/);
@@ -2382,7 +2486,7 @@ function toggleHistoryOverlay() {
           actions.push('放大 ' + bigMatch2[1] + ' 倍');
         }
       }
-      
+
       // ====== ROTATION ======
       else if (/[xXyYzZ]轴/.test(text) && /旋转|转/.test(text)) {
         var rdeg = num || 90;
@@ -2395,32 +2499,32 @@ function toggleHistoryOverlay() {
         currentMesh.rotation.y += num * Math.PI / 180;
         actions.push('旋转 ' + num + '°');
       }
-      
+
       // ====== FALLBACK ======
       if (actions.length === 0) {
         // Remove unused undo state
         if (undoStack.length > 0) { var unused = undoStack.pop(); unused.geometry.dispose(); }
         return { message: '未识别：' + text + '\n\n输入"帮助"查看所有支持的指令', applied: null };
       }
-      
+
       // Record to version history
       addVersionRecord(actions.join('，'));
-      
+
       return { message: '已应用：' + actions.join('，'), applied: true };
     }
-    
+
     // ========== STL EXPORT ==========
-    
+
     // Export current mesh as STL file for download
     window.exportSTL = function() {
       if (!currentMesh) {
         alert('未加载零件模型');
         return;
       }
-      
+
       const geometry = currentMesh.geometry;
       const stlData = generateBinarySTL(geometry);
-      
+
       // Create blob and download
       const blob = new Blob([stlData], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
@@ -2429,93 +2533,93 @@ function toggleHistoryOverlay() {
       link.download = 'part_' + Date.now() + '.stl';
       link.click();
       URL.revokeObjectURL(url);
-      
+
       var info = analyzeGeometry(currentMesh);
       var sizeStr = info ? info.dimX + ' x ' + info.dimY + ' x ' + info.dimZ + ' mm' : '';
       addChatMessage('assistant', '已导出 STL（单位: mm）\n尺寸: ' + sizeStr + '\n\n可用 MeshLab 打开查看和进一步编辑');
-      
+
       console.log('STL exported, size:', stlData.byteLength, 'bytes');
     };
-    
+
     // Generate binary STL from Three.js geometry
     function generateBinarySTL(geometry) {
       const positionAttr = geometry.attributes.position;
       const triangleCount = positionAttr.count / 3;
-      
+
       // Binary STL format:
       // 80 bytes header + 4 bytes triangle count + 50 bytes per triangle
       const bufferSize = 80 + 4 + triangleCount * 50;
       const buffer = new ArrayBuffer(bufferSize);
       const view = new DataView(buffer);
-      
+
       // Write header (80 bytes, filled with 0)
       for (let i = 0; i < 80; i++) {
         view.setUint8(i, 0);
       }
-      
+
       // Write triangle count
       view.setUint32(80, triangleCount, true);
-      
+
       // Write triangles
       let offset = 84;
       for (let i = 0; i < triangleCount; i++) {
         const i1 = i * 3;
         const i2 = i * 3 + 1;
         const i3 = i * 3 + 2;
-        
+
         const v1 = new THREE.Vector3().fromBufferAttribute(positionAttr, i1);
         const v2 = new THREE.Vector3().fromBufferAttribute(positionAttr, i2);
         const v3 = new THREE.Vector3().fromBufferAttribute(positionAttr, i3);
-        
+
         // Calculate normal
         const normal = new THREE.Vector3();
         const edge1 = new THREE.Vector3().subVectors(v2, v1);
         const edge2 = new THREE.Vector3().subVectors(v3, v1);
         normal.crossVectors(edge1, edge2);
         normal.normalize();
-        
+
         // Write normal (12 bytes)
         view.setFloat32(offset, normal.x, true); offset += 4;
         view.setFloat32(offset, normal.y, true); offset += 4;
         view.setFloat32(offset, normal.z, true); offset += 4;
-        
+
         // Write v1 (12 bytes)
         view.setFloat32(offset, v1.x, true); offset += 4;
         view.setFloat32(offset, v1.y, true); offset += 4;
         view.setFloat32(offset, v1.z, true); offset += 4;
-        
+
         // Write v2 (12 bytes)
         view.setFloat32(offset, v2.x, true); offset += 4;
         view.setFloat32(offset, v2.y, true); offset += 4;
         view.setFloat32(offset, v2.z, true); offset += 4;
-        
+
         // Write v3 (12 bytes)
         view.setFloat32(offset, v3.x, true); offset += 4;
         view.setFloat32(offset, v3.y, true); offset += 4;
         view.setFloat32(offset, v3.z, true); offset += 4;
-        
+
         // Write attribute byte count (2 bytes, always 0)
         view.setUint16(offset, 0, true); offset += 2;
       }
-      
+
       return buffer;
     }
-    
+
     // ========== CSG BRIDGE: Three.js <-> CSG.js ==========
-    
+
     // Convert Three.js Mesh to CSG object
     function threeToCSG(mesh) {
       const geo = mesh.geometry;
       const posAttr = geo.attributes.position;
       const indexAttr = geo.index;
       const polygons = [];
-      
+
       // Apply mesh transforms (scale, rotation, translation) to vertices
       const matrix = mesh.matrixWorld;
       mesh.updateMatrixWorld(true);
-      
+
       const triCount = indexAttr ? indexAttr.count / 3 : posAttr.count / 3;
-      
+
       for (let i = 0; i < triCount; i++) {
         const vertices = [];
         for (let j = 0; j < 3; j++) {
@@ -2541,12 +2645,12 @@ function toggleHistoryOverlay() {
       }
       return CSG.fromPolygons(polygons);
     }
-    
+
     // Convert CSG object back to Three.js BufferGeometry
     function csgToGeometry(csg) {
       const positions = [];
       const polys = csg.toPolygons();
-      
+
       for (const poly of polys) {
         // Triangulate polygon (fan from first vertex)
         for (let i = 1; i < poly.vertices.length - 1; i++) {
@@ -2558,23 +2662,23 @@ function toggleHistoryOverlay() {
           positions.push(c.x, c.y, c.z);
         }
       }
-      
+
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
       geometry.computeVertexNormals();
       return geometry;
     }
-    
+
     // Perform CSG subtraction: mesh - tool, replace mesh geometry in-place
     function csgSubtract(mesh, toolGeometry) {
       if (!mesh || !mesh.geometry) {
         console.log('csgSubtract: no mesh');
         return;
       }
-      
+
       console.log('CSG subtract starting...');
       const t0 = performance.now();
-      
+
       // Create a temporary mesh for the tool so we can apply transforms
       const toolMesh = new THREE.Mesh(toolGeometry);
       // Put tool in same coordinate space as mesh
@@ -2582,38 +2686,38 @@ function toggleHistoryOverlay() {
       toolMesh.rotation.set(0, 0, 0);
       toolMesh.scale.set(1, 1, 1);
       toolMesh.updateMatrixWorld(true);
-      
+
       const csgA = threeToCSG(mesh);
       const csgB = threeToCSG(toolMesh);
       const csgResult = csgA.subtract(csgB);
-      
+
       const newGeo = csgToGeometry(csgResult);
-      
+
       // Replace geometry
       mesh.geometry.dispose();
       mesh.geometry = newGeo;
-      
+
       // Reset mesh transforms since CSG was done in world space
       mesh.position.set(0, 0, 0);
       mesh.rotation.set(0, 0, 0);
       mesh.scale.set(1, 1, 1);
       mesh.updateMatrixWorld(true);
-      
+
       const dt = (performance.now() - t0).toFixed(0);
       const triCount = newGeo.attributes.position.count / 3;
       console.log(`CSG subtract done in ${dt}ms, ${triCount} triangles`);
     }
-    
+
     // ========== BOOLEAN OPERATION FUNCTIONS ==========
-    
+
     // Punch a cylinder hole through the mesh center (Y axis)
     function applyHole(mesh, radius) {
       if (!mesh || !mesh.geometry) return;
-      
+
       mesh.updateMatrixWorld(true);
       const geo = mesh.geometry;
       geo.computeBoundingBox();
-      
+
       // Get bounds in world space
       const bbMin = geo.boundingBox.min.clone().applyMatrix4(mesh.matrixWorld);
       const bbMax = geo.boundingBox.max.clone().applyMatrix4(mesh.matrixWorld);
@@ -2621,126 +2725,178 @@ function toggleHistoryOverlay() {
       const sizeX = bbMax.x - bbMin.x;
       const sizeY = bbMax.y - bbMin.y;
       const sizeZ = bbMax.z - bbMin.z;
-      
+
       // Default hole radius = 20% of smallest XZ dimension
       const holeRadius = radius || Math.min(sizeX, sizeZ) * 0.2;
       const holeHeight = sizeY + 2; // extend beyond model
-      
+
       console.log('Punching cylinder hole:', { holeRadius, holeHeight, center: center.toArray() });
-      
+
       // Create cylinder tool aligned along Y axis, centered at model center
       const cylGeo = new THREE.CylinderGeometry(holeRadius, holeRadius, holeHeight, 24);
       cylGeo.translate(center.x, center.y, center.z);
-      
+
       csgSubtract(mesh, cylGeo);
       cylGeo.dispose();
     }
-    
+
     // Punch a box hole through the mesh center
     function applyBoxHole(mesh, size) {
       if (!mesh || !mesh.geometry) return;
-      
+
       mesh.updateMatrixWorld(true);
       const geo = mesh.geometry;
       geo.computeBoundingBox();
-      
+
       const bbMin = geo.boundingBox.min.clone().applyMatrix4(mesh.matrixWorld);
       const bbMax = geo.boundingBox.max.clone().applyMatrix4(mesh.matrixWorld);
       const center = new THREE.Vector3().addVectors(bbMin, bbMax).multiplyScalar(0.5);
       const sizeY = bbMax.y - bbMin.y;
-      
+
       const holeSize = size || 10;
       const holeHeight = sizeY + 2;
-      
+
       console.log('Punching box hole:', { holeSize, holeHeight });
-      
+
       const boxGeo = new THREE.BoxGeometry(holeSize, holeHeight, holeSize);
       boxGeo.translate(center.x, center.y, center.z);
-      
+
       csgSubtract(mesh, boxGeo);
       boxGeo.dispose();
     }
-    
+
     // Punch a spherical hole at the mesh center
     function applySphereHole(mesh, radius) {
       if (!mesh || !mesh.geometry) return;
-      
+
       mesh.updateMatrixWorld(true);
       const geo = mesh.geometry;
       geo.computeBoundingBox();
-      
+
       const bbMin = geo.boundingBox.min.clone().applyMatrix4(mesh.matrixWorld);
       const bbMax = geo.boundingBox.max.clone().applyMatrix4(mesh.matrixWorld);
       const center = new THREE.Vector3().addVectors(bbMin, bbMax).multiplyScalar(0.5);
       const sizeX = bbMax.x - bbMin.x;
       const sizeZ = bbMax.z - bbMin.z;
-      
+
       const holeRadius = radius || Math.min(sizeX, sizeZ) * 0.25;
-      
+
       console.log('Punching sphere hole:', { holeRadius });
-      
+
       const sphereGeo = new THREE.SphereGeometry(holeRadius, 16, 12);
       sphereGeo.translate(center.x, center.y, center.z);
-      
+
       csgSubtract(mesh, sphereGeo);
       sphereGeo.dispose();
     }
-    
+
     // Simplify mesh by reducing vertices
     function simplifyMesh(mesh, ratio) {
       if (!mesh || !mesh.geometry) return;
-      
+
       const geometry = mesh.geometry;
       const positionAttr = geometry.attributes.position;
-      
+
       // Simple subsampling - keep every Nth vertex
       const step = Math.max(1, Math.floor(1 / ratio));
       const newPositions = [];
-      
+
       for (let i = 0; i < positionAttr.count; i += step) {
         newPositions.push(positionAttr.getX(i));
         newPositions.push(positionAttr.getY(i));
         newPositions.push(positionAttr.getZ(i));
       }
-      
+
       // Create new geometry with fewer vertices
       const newGeometry = new THREE.BufferGeometry();
       newGeometry.setAttribute('position', new THREE.Float32BufferAttribute(newPositions, 3));
       newGeometry.computeVertexNormals();
-      
+
       // Replace mesh
       mesh.geometry = newGeometry;
     }
-    
+
     // Smooth mesh by averaging vertex normals
     function smoothMesh(mesh) {
       if (!mesh || !mesh.geometry) return;
-      
+
       mesh.geometry.computeVertexNormals();
       console.log('Mesh smoothed');
     }
-    
+
     // ========== GEOMETRY ANALYSIS ==========
-    function analyzeGeometry(mesh) {
-      if (!mesh || !mesh.geometry) return null;
-      var geo = mesh.geometry;
-      var s = mesh.scale;
-      
+     function analyzeGeometry(mesh) {
+      // Handle Group objects (ASM files) by computing bounding box of entire group
+      if (!mesh) return null;
+
+      var geo, s, vertCount, triCount, posAttr;
+
+      if (mesh.isGroup || mesh.type === 'Group') {
+        // For Groups, use bounding box approach
+        var box = new THREE.Box3().setFromObject(mesh);
+        var size = new THREE.Vector3();
+        box.getSize(size);
+
+        var dimX = size.x.toFixed(2);
+        var dimY = size.y.toFixed(2);
+        var dimZ = size.z.toFixed(2);
+        var dims = [parseFloat(dimX), parseFloat(dimY), parseFloat(dimZ)].sort(function(a,b){return b-a;});
+
+        // Estimate volume from bounding box (rough approximation)
+        var volume = size.x * size.y * size.z * 0.6; // 0.6 factor for typical 3D shapes
+
+        // Estimate surface area (rough approximation: 2 * (xy + yz + xz))
+        var surfArea = 2 * (size.x * size.y + size.y * size.z + size.x * size.z);
+
+        // Count vertices and triangles from all children
+        vertCount = 0;
+        triCount = 0;
+        mesh.traverse(function(child) {
+          if (child.isMesh && child.geometry) {
+            var childPosAttr = child.geometry.attributes.position;
+            vertCount += childPosAttr.count;
+            triCount += child.geometry.index ? child.geometry.index.count / 3 : childPosAttr.count / 3;
+          }
+        });
+
+        // Determine body type
+        var ratio = dims[0] / (dims[2] || 0.01);
+        var bodyType = '块状体';
+        if (ratio > 5) bodyType = '薄板/片状体';
+        else if (ratio > 2.5 && dims[1] / dims[2] < 1.5) bodyType = '长条/轴类';
+
+        return {
+          dimX: dimX, dimY: dimY, dimZ: dimZ,
+          dims: dims,
+          volume: volume.toFixed(2),
+          surfArea: surfArea.toFixed(2),
+          vertCount: vertCount,
+          triCount: Math.floor(triCount),
+          bodyType: bodyType,
+          avgRadius: (Math.max(dims[0], dims[1], dims[2]) / 2).toFixed(2)
+        };
+      }
+
+      // Standard Mesh handling
+      if (!mesh.geometry) return null;
+      geo = mesh.geometry;
+      s = mesh.scale;
+
       geo.computeBoundingBox();
       var bb = geo.boundingBox;
       var size = new THREE.Vector3();
       bb.getSize(size);
-      
+
       // Actual dimensions in mm (geometry * scale)
       var dimX = (size.x * Math.abs(s.x)).toFixed(2);
       var dimY = (size.y * Math.abs(s.y)).toFixed(2);
       var dimZ = (size.z * Math.abs(s.z)).toFixed(2);
       var dims = [parseFloat(dimX), parseFloat(dimY), parseFloat(dimZ)].sort(function(a,b){return b-a;});
-      
+
       var posAttr = geo.attributes.position;
       var vertCount = posAttr.count;
       var triCount = geo.index ? geo.index.count / 3 : vertCount / 3;
-      
+
       // Estimate volume via signed tetrahedra method
       var volume = 0;
       for (var i = 0; i < vertCount; i += 3) {
@@ -2750,7 +2906,7 @@ function toggleHistoryOverlay() {
         volume += (ax*(by*cz - bz*cy) + bx*(cy*az - cz*ay) + cx*(ay*bz - az*by)) / 6;
       }
       volume = Math.abs(volume);
-      
+
       // Estimate surface area
       var surfArea = 0;
       for (var i = 0; i < vertCount; i += 3) {
@@ -2761,13 +2917,13 @@ function toggleHistoryOverlay() {
         var e2 = new THREE.Vector3().subVectors(v2, v0);
         surfArea += e1.cross(e2).length() * 0.5;
       }
-      
+
       // Determine body type heuristic
       var ratio = dims[0] / (dims[2] || 0.01);
       var bodyType = '块状体';
       if (ratio > 5) bodyType = '薄板/片状体';
       else if (ratio > 2.5 && dims[1] / dims[2] < 1.5) bodyType = '长条/轴类';
-      
+
       // Check if roughly cylindrical (circular cross-section)
       var center = new THREE.Vector3();
       bb.getCenter(center);
@@ -2788,7 +2944,7 @@ function toggleHistoryOverlay() {
       }
       rVariance = rCount > 1 ? Math.sqrt(rVariance / rCount) / avgR : 1;
       if (rVariance < 0.15 && avgR > 1) bodyType = '圆柱体/回转体 (估算直径 ' + (avgR * 2).toFixed(2) + 'mm)';
-      
+
       return {
         dimX: dimX, dimY: dimY, dimZ: dimZ,
         dims: dims,
@@ -2949,6 +3105,7 @@ function toggleHistoryOverlay() {
 
           pdfPromise.then(function(pdfUrl) {
             addChatMessage('assistant', '📄 [点击查看结构仿真报告 PDF]', null, pdfUrl);
+            logUsage({ type: 'sim', desc: '结构仿真报告生成', tokens: 1200 });
             if (btn) { btn.disabled = false; btn.textContent = '⚙️ 结构仿真'; }
           }).catch(function(err) {
             addChatMessage('assistant', '仿真报告生成失败：' + err.message);
@@ -3012,6 +3169,7 @@ function toggleHistoryOverlay() {
 
           pdfPromise.then(function(pdfUrl) {
             addChatMessage('assistant', '📄 [点击查看动力学仿真报告 PDF]', null, pdfUrl);
+            logUsage({ type: 'sim', desc: '动力学仿真报告生成', tokens: 1500 });
             if (btn) { btn.disabled = false; btn.textContent = '🔧 动力学仿真'; }
           }).catch(function(err) {
             addChatMessage('assistant', 'PDF 报告生成失败：' + err.message);
@@ -3115,13 +3273,13 @@ function toggleHistoryOverlay() {
         + '</body></html>');
       win.document.close();
     }
-    
+
     // Auto-analyze and post to chat after file load
     function autoAnalyzeGeometry() {
       if (!currentMesh) return;
       var info = analyzeGeometry(currentMesh);
       if (!info) return;
-      
+
       var msg = '📐 零件几何分析报告\n\n'
         + '【主体结构】' + info.bodyType + '\n'
         + '【外形尺寸】' + info.dims[0].toFixed(2) + ' × ' + info.dims[1].toFixed(2) + ' × ' + info.dims[2].toFixed(2) + ' mm\n'
@@ -3129,33 +3287,34 @@ function toggleHistoryOverlay() {
         + '【体积】' + info.volume + ' mm³\n'
         + '【表面积】' + info.surfArea + ' mm²\n'
         + '【网格】' + info.triCount + ' 三角面, ' + info.vertCount + ' 顶点\n';
-      
+
       if (info.avgRadius) {
         msg += '【估算半径】' + info.avgRadius + ' mm\n';
       }
-      
+
       msg += '\n可用自然语言描述修改需求，例如：\n'
         + '• "在顶面中心加一个直径8mm的通孔"\n'
         + '• "四边倒角R2"\n'
         + '• "整体放大到长度120mm"\n'
         + '• 输入"帮助"查看完整指令列表';
-      
+
       addChatMessage('assistant', msg);
+      logUsage({ type: 'generate', desc: '几何分析报告（' + info.bodyType + '）', tokens: 200 });
     }
-    
+
     function applySTLModification(result) {
       if (!result || !currentMesh) {
         return { message: 'No model loaded to modify' };
       }
-      
+
       // Result could be text describing what to do, or actual parameters
       return parseLocalModification(result.instruction || result);
     }
-    
+
     // Apply modification to the mesh
     window.applyMeshModification = function(mod) {
       if (!currentMesh || !mod) return;
-      
+
       if (mod.scale && mod.scale !== 1) {
         currentMesh.scale.set(mod.scale, mod.scale, mod.scale);
       }
@@ -3165,7 +3324,7 @@ function toggleHistoryOverlay() {
         if (mod.rotation.z) currentMesh.rotation.z += mod.rotation.z;
       }
     };
-    
+
     // ========== EVENT LISTENERS ==========
     chatSend.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
@@ -3175,7 +3334,7 @@ function toggleHistoryOverlay() {
     // STL Upload — attach to all 3 tab upload areas
     const fileInput = document.getElementById('fileInput');
     const VISUAL_PREVIEW_EXTENSIONS = ['stl', 'ply', 'obj', '3mf', 'step', 'stp', 'iges', 'igs', 'prt', 'asm', 'drw', 'dwg', 'dxf', 'pdf', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'tif', 'tiff'];
-    const BROWSER_PREVIEW_EXTENSIONS = ['stl', 'step', 'stp'];
+    const BROWSER_PREVIEW_EXTENSIONS = ['stl', 'step', 'stp', 'asm'];
 
     function getActiveLoading() {
       return document.getElementById('loading' + DESIGN_TABS.indexOf(activeDesignTab));
@@ -3193,7 +3352,7 @@ function toggleHistoryOverlay() {
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length) handleSTLFile(e.target.files[0]);
     });
-    
+
     // Also allow drag onto preview area
     const previewArea = document.getElementById('previewArea');
     previewArea.addEventListener('dragover', (e) => e.preventDefault());
@@ -3232,12 +3391,7 @@ function toggleHistoryOverlay() {
     }
 
     function showPendingPreview(file) {
-      if (currentMesh) {
-        scene.remove(currentMesh);
-        if (currentMesh.geometry) currentMesh.geometry.dispose();
-        if (currentMesh.material) currentMesh.material.dispose();
-        currentMesh = null;
-      }
+      disposeCurrentModel();
       document.getElementById('previewControls').style.display = 'none';
       hasModel = false;
       chatInput.disabled = true;
@@ -3253,13 +3407,598 @@ function toggleHistoryOverlay() {
       addChatMessage('assistant', '文件已导入上传历史：' + file.name + '\n\n该格式需要 AI-Visual-Preview 转换服务生成 GLB/glTF、SVG、PDF 或 PNG 预览资产后再进行浏览器预览。');
     }
 
-    function handleSTLFile(file) {
+    // Load ASM file and generate synthetic assembly preview
+    function loadASMFile(file, callback) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var text = e.target.result;
+        var parsed = parseASMFile(text);
+        console.log('ASM parsed:', parsed);
+
+        if (parsed.components.length === 0) {
+          alert('ASM 文件中未解析出任何零件，可能是格式不兼容。');
+          if (callback) callback();
+          return;
+        }
+
+        var group = generateASMAssembly(parsed);
+
+        // Cleanup previous mesh/group
+        disposeCurrentModel();
+
+        // Normalize group so assembly fits in preview (same approach as STL)
+        group.updateMatrixWorld(true);
+        var box = new THREE.Box3().setFromObject(group);
+        var center = new THREE.Vector3();
+        box.getCenter(center);
+        var size = new THREE.Vector3();
+        box.getSize(size);
+        var maxDim = Math.max(size.x, size.y, size.z) || 1;
+        var scale = 80 / maxDim;
+        // Apply normalization to the group wrapper (children positions stay in local space).
+        group.position.sub(center);
+        group.scale.multiplyScalar(scale);
+
+        group.userData.asmData = parsed;
+        group.userData.isAssembly = true;
+        scene.add(group);
+
+        // Treat the group itself as the currentMesh for compatibility (Groups support recursive raycasting).
+        currentMesh = group;
+        asmGroup = group;
+
+        // Prepare explode animation state
+        asmExplodeTarget = 0;
+        asmExplodeCurrent = 0;
+        applyAssemblyExplode(); // snap to assembled state
+
+        // Show explode button
+        document.getElementById('previewControls').style.display = 'flex';
+        var explodeBtn = document.getElementById('btn-explode');
+        if (explodeBtn) explodeBtn.style.display = '';
+        if (explodeBtn) {
+          explodeBtn.textContent = '💥 爆炸视图';
+          explodeBtn.classList.remove('active');
+        }
+
+        window.enableChat();
+        resetCamera();
+
+        addChatMessage('assistant',
+          '✅ ASM 装配体已解析预览\n\n'
+          + '• 零件数：' + parsed.components.length + '\n'
+          + '• 总件数：' + (parsed.bom ? parsed.bom.reduce(function(s, b) { return s + b.qty; }, 0) : parsed.components.length) + '\n'
+          + '• 材料：' + (parsed.parameters.ASM_MEMBER_MATERIAL || '未指定') + '\n'
+          + '• 设计者：' + (parsed.parameters.ASM_DESIGNER || '未知') + '\n\n'
+          + '💡 点击「💥 爆炸视图」查看零件展开动画。'
+        );
+
+        if (callback) callback();
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    // Helper: dispose whatever is currently loaded (mesh or assembly group)
+    function disposeCurrentModel() {
+      if (!currentMesh) return;
+
+      // If it's an assembly group, dispose its children
+      if (currentMesh.userData && currentMesh.userData.isAssembly) {
+        currentMesh.traverse(function (child) {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(function (m) { m.dispose(); });
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+        asmGroup = null;
+        asmExplodeTarget = 0;
+        asmExplodeCurrent = 0;
+        // Hide explode button
+        var explodeBtn = document.getElementById('btn-explode');
+        if (explodeBtn) explodeBtn.style.display = 'none';
+      } else {
+        // Single mesh
+        if (currentMesh.geometry) currentMesh.geometry.dispose();
+        if (currentMesh.material) {
+          if (Array.isArray(currentMesh.material)) {
+            currentMesh.material.forEach(function (m) { m.dispose(); });
+          } else {
+            currentMesh.material.dispose();
+          }
+        }
+      }
+      scene.remove(currentMesh);
+      currentMesh = null;
+    }
+
+    // Apply the current explode lerp to all children of the assembly group.
+    function applyAssemblyExplode() {
+      if (!asmGroup || !asmGroup.children) return;
+      var t = asmExplodeCurrent; // 0..1
+      asmGroup.children.forEach(function (child) {
+        var a = child.userData.assembledPosition;
+        var e = child.userData.explodedPosition;
+        if (!a || !e) return;
+        child.position.set(
+          a.x + (e.x - a.x) * t,
+          a.y + (e.y - a.y) * t,
+          a.z + (e.z - a.z) * t
+        );
+      });
+    }
+
+    // Toggle between assembled and exploded states
+    window.toggleExplodeAssembly = function () {
+      if (!asmGroup) return;
+      asmExplodeTarget = asmExplodeTarget === 0 ? 1 : 0;
+      var btn = document.getElementById('btn-explode');
+      if (btn) {
+        btn.classList.toggle('active', asmExplodeTarget === 1);
+        btn.textContent = asmExplodeTarget === 1 ? '🔧 装配视图' : '💥 爆炸视图';
+      }
+    };
+
+    // Parse ASM text into structured object
+    function parseASMFile(text) {
+      var result = {
+        version: '',
+        componentName: '',
+        components: [],
+        constraints: {},
+        parameters: {},
+        tolerances: [],
+        bom: []
+      };
+
+      var lines = text.replace(/\r\n/g, '\n').split('\n');
+      var currentComponent = null;
+      var currentConstraintList = [];
+      var currentComponentName = '';
+      var currentComponentFile = '';
+      var currentComponentType = '';
+
+      for (var i = 0; i < lines.length; i++) {
+        var raw = lines[i];
+        var line = raw.trim();
+        if (!line || line.startsWith('!')) continue;
+
+        if (line.startsWith('ASM.FILE_VERSION')) {
+          result.version = line.replace('ASM.FILE_VERSION', '').trim();
+        } else if (line.startsWith('ASM.NAME')) {
+          var m = line.match(/ASM\.NAME\s+"?([^"\n]+)"?/);
+          if (m) result.componentName = m[1].trim();
+        } else if (line.match(/^COMPONENT_TYPE\s+(\w+)/)) {
+          currentComponentType = line.replace(/^COMPONENT_TYPE\s+/, '').trim();
+        } else if (line.match(/^COMPONENT_NAME\s+/)) {
+          var nm = line.replace(/^COMPONENT_NAME\s+/, '').replace(/"/g, '').trim();
+          currentComponentName = nm;
+        } else if (line.match(/^COMPONENT_FILE\s+/)) {
+          currentComponentFile = line.replace(/^COMPONENT_FILE\s+/, '').replace(/"/g, '').trim();
+        } else if (line === 'CONSTRAINTS') {
+          currentConstraintList = [];
+        } else if (line.startsWith('ASM_CONSTRAINT_TYPE')) {
+          currentConstraintList.push({
+            type: line.replace('ASM_CONSTRAINT_TYPE', '').trim()
+          });
+        } else if (line.startsWith('ASM_CONSTRAINT_REF') && currentConstraintList.length > 0) {
+          currentConstraintList[currentConstraintList.length - 1].ref = line.replace('ASM_CONSTRAINT_REF', '').trim();
+        } else if (line.startsWith('ASM_CONSTRAINT_OFFSET') && currentConstraintList.length > 0) {
+          currentConstraintList[currentConstraintList.length - 1].offset = parseFloat(line.replace('ASM_CONSTRAINT_OFFSET', '').trim()) || 0;
+        } else if (line === 'END_CONSTRAINTS') {
+          if (currentComponentName) {
+            currentComponent = {
+              name: currentComponentName,
+              file: currentComponentFile,
+              type: currentComponentType,
+              constraints: currentConstraintList.slice()
+            };
+            result.components.push(currentComponent);
+          }
+          currentComponentType = currentComponentName = currentComponentFile = '';
+          currentConstraintList = [];
+        } else if (line.startsWith('PARAMETER_NAME')) {
+          var pm = line.match(/PARAMETER_NAME\s+(\S+)/);
+          if (pm) result._pendingParam = pm[1];
+        } else if (line.startsWith('PARAMETER_TYPE') && result._pendingParam) {
+          result._pendingParamType = line.replace('PARAMETER_TYPE', '').trim();
+        } else if (line.startsWith('PARAMETER_VALUE') && result._pendingParam) {
+          var val = line.replace('PARAMETER_VALUE', '').replace(/"/g, '').trim();
+          if (result._pendingParamType === 'REAL_NUMBER' || result._pendingParamType === 'INTEGER') {
+            val = parseFloat(val);
+          }
+          result.parameters[result._pendingParam] = val;
+          result._pendingParam = null;
+        } else if (line.startsWith('TOLERANCE_NAME')) {
+          var tn = line.match(/TOLERANCE_NAME\s+(\S+)/);
+          if (tn) result.tolerances.push({ name: tn[1] });
+        } else if (result.tolerances.length > 0) {
+          var lastTol = result.tolerances[result.tolerances.length - 1];
+          if (line.startsWith('TOLERANCE_TYPE')) {
+            lastTol.type = line.replace('TOLERANCE_TYPE', '').trim();
+          } else if (line.startsWith('TOLERANCE_VALUE')) {
+            lastTol.value = parseFloat(line.replace('TOLERANCE_VALUE', '').trim()) || 0;
+          }
+        } else if (line.startsWith('ITEM')) {
+          var bm = line.match(/NO=(\d+)\s+QTY=(\d+)\s+NAME=(\S+)\s+DESC="?([^"\n]*)"?\s*$/);
+          if (bm) {
+            result.bom.push({
+              no: parseInt(bm[1]),
+              qty: parseInt(bm[2]),
+              name: bm[3],
+              desc: bm[4] || ''
+            });
+          }
+        }
+      }
+      delete result._pendingParam;
+      delete result._pendingParamType;
+      return result;
+    }
+
+    // Generate synthetic assembly geometry from parsed ASM data.
+    // Each child's userData stores both assembledPosition and explodedPosition
+    // in local group space (normalize is applied externally to the group).
+    function generateASMAssembly(parsed) {
+      var group = new THREE.Group();
+      var numComps = parsed.components.length;
+
+      // First pass: build each component proxy at assembled position so we can compute bounding box
+      parsed.components.forEach(function (comp, idx) {
+        var childGroup = generateComponentProxy(comp, idx);
+        childGroup.userData.component = comp;
+
+        var assembledPos = computeAssembledPosition(comp, comp.constraints, idx);
+        childGroup.position.copy(assembledPos);
+        childGroup.userData.assembledPosition = assembledPos.clone();
+
+        group.add(childGroup);
+      });
+
+      // Compute bounding box of assembled state to derive explode radius in local space.
+      // Final explode target = ~1.5x the maxDim (after group.scale = 80/maxDim, this becomes 120 world units).
+      group.updateMatrixWorld(true);
+      var bbox = new THREE.Box3().setFromObject(group);
+      var bboxSize = new THREE.Vector3();
+      bbox.getSize(bboxSize);
+      var explodeRadius = Math.max(bboxSize.x, bboxSize.y, bboxSize.z, 1) * 0.8;
+
+      // Second pass: compute exploded positions based on actual size
+      var centroid = new THREE.Vector3();
+      group.children.forEach(function (c) { centroid.add(c.position); });
+      if (numComps > 0) centroid.multiplyScalar(1 / numComps);
+
+      group.children.forEach(function (child, idx) {
+        child.userData.explodedPosition = computeExplodedPosition(
+          child.userData.assembledPosition, centroid, idx, numComps, explodeRadius
+        );
+      });
+
+      return group;
+    }
+
+    // Compute assembled position based on ASM constraints
+    function computeAssembledPosition(comp, constraints, idx) {
+      var desc = (comp.file || comp.name || '').toLowerCase();
+
+      // Component-type-based layered positioning for realistic assembly look
+      if (/base.*plate|plate.*base/i.test(desc)) {
+        return new THREE.Vector3(0, -30, 0);
+      } else if (/gearbox.*housing|housing.*body/i.test(desc)) {
+        return new THREE.Vector3(0, 0, 0);
+      } else if (/housing.*cover|cover|lid/i.test(desc) && !/oil/i.test(desc)) {
+        return new THREE.Vector3(0, 25, 0);
+      } else if (/shaft.*main|main.*shaft/i.test(desc)) {
+        return new THREE.Vector3(0, 0, 15);
+      } else if (/shaft.*counter|counter.*shaft/i.test(desc)) {
+        return new THREE.Vector3(0, 0, -15);
+      } else if (/gear.*drive/i.test(desc)) {
+        return new THREE.Vector3(20, 0, 15);
+      } else if (/gear.*driven/i.test(desc)) {
+        return new THREE.Vector3(-20, 0, -15);
+      } else if (/gear.*output/i.test(desc)) {
+        return new THREE.Vector3(30, 0, 15);
+      } else if (/bearing.*main.*left/i.test(desc)) {
+        return new THREE.Vector3(-30, 0, 15);
+      } else if (/bearing.*main.*right/i.test(desc)) {
+        return new THREE.Vector3(30, 0, 15);
+      } else if (/bearing.*counter.*left/i.test(desc)) {
+        return new THREE.Vector3(-25, 0, -15);
+      } else if (/bearing.*counter.*right/i.test(desc)) {
+        return new THREE.Vector3(25, 0, -15);
+      } else if (/bolt|screw/i.test(desc)) {
+        var boltIdx = idx % 4;
+        var angle = (boltIdx * Math.PI / 2) + Math.PI / 4;
+        return new THREE.Vector3(Math.cos(angle) * 45, 28, Math.sin(angle) * 35);
+      } else if (/nut/i.test(desc)) {
+        var nutIdx = idx % 4;
+        var angle2 = (nutIdx * Math.PI / 2) + Math.PI / 4;
+        return new THREE.Vector3(Math.cos(angle2) * 45, -28, Math.sin(angle2) * 35);
+      } else if (/washer/i.test(desc)) {
+        var wIdx = idx % 4;
+        var angle3 = (wIdx * Math.PI / 2) + Math.PI / 4;
+        return new THREE.Vector3(Math.cos(angle3) * 45, 20, Math.sin(angle3) * 35);
+      } else if (/spring/i.test(desc)) {
+        return new THREE.Vector3(35, 10, 0);
+      } else if (/ring.*snap|snap.*ring/i.test(desc)) {
+        return new THREE.Vector3(-35, 5, 10);
+      } else if (/cap.*oil|oil.*cap/i.test(desc)) {
+        return new THREE.Vector3(0, 30, 30);
+      }
+
+      // Fallback: use constraints if available
+      if (constraints && constraints.length) {
+        var offsetX = 0, offsetY = 0, offsetZ = 0;
+        constraints.forEach(function (c) {
+          var o = c.offset || 0;
+          var t = (c.type || '').toLowerCase();
+          var ref = (c.ref || '').toLowerCase();
+          if (ref.indexOf('front') >= 0 || ref.indexOf('top') >= 0 || ref.indexOf('bottom') >= 0) {
+            offsetY += o || (idx % 3) * 15;
+          } else if (ref.indexOf('right') >= 0 || ref.indexOf('left') >= 0) {
+            offsetX += o || (idx % 3) * 20;
+          } else if (ref.indexOf('axis') >= 0 || ref.indexOf('center') >= 0) {
+            offsetZ += o;
+          } else {
+            offsetY += o * 0.3;
+          }
+          if (t === 'asm_mate') offsetY += (o || 0) * 0.2;
+        });
+        if (offsetX !== 0 || offsetY !== 0 || offsetZ !== 0) {
+          return new THREE.Vector3(offsetX, offsetY, offsetZ);
+        }
+      }
+
+      var angle = idx * 0.9;
+      return new THREE.Vector3(Math.cos(angle) * 20, idx * 6, Math.sin(angle) * 20);
+    }
+
+    // Compute exploded position: push each part outward from centroid along a radial direction plus vertical scatter.
+    function computeExplodedPosition(assembledPos, centroid, idx, numComps, explodeRadius) {
+      if (numComps <= 1) return assembledPos.clone();
+      var angleStep = (Math.PI * 2) / numComps;
+      var angle = idx * angleStep;
+      // Radial direction from centroid, or fall back to assembled direction if centroid is too close.
+      var radial = new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle));
+      // Lift parts slightly on Y axis to avoid clumping in one plane
+      var baseY = assembledPos.y + (idx - numComps / 2) * 8;
+      return new THREE.Vector3(
+        centroid.x + radial.x * explodeRadius,
+        baseY,
+        centroid.z + radial.z * explodeRadius
+      );
+    }
+
+    function generateComponentProxy(comp, idx) {
+      var g = new THREE.Group();
+      g.name = comp.name || ('component_' + idx);
+
+      var mat = new THREE.MeshPhongMaterial({
+        color: [0x296AFA, 0x38BDF8, 0x0EA5E9, 0x6366F1, 0x8B5CF6, 0x10B981][idx % 6],
+        specular: 0x333333,
+        shininess: 80
+      });
+
+      var desc = (comp.file || comp.name || '').toLowerCase();
+      var meshes = [];
+
+      // Parse size hints from name (e.g. M8, 6205, 20T, 40T)
+      var mMatch = desc.match(/m(\d+)/i);
+      var mSize = mMatch ? parseInt(mMatch[1]) : 8;
+      var bMatch = desc.match(/620(\d)/);
+      var bSize = bMatch ? parseInt(bMatch[1]) : 5;
+
+      // Enhanced heuristic rules
+      if (/gearbox.*housing|housing.*body/i.test(desc)) {
+        // Gearbox housing: large box with internal bore pattern (represented as thick box)
+        var body = new THREE.Mesh(new THREE.BoxGeometry(100, 40, 70), mat);
+        meshes.push(body);
+      } else if (/housing.*cover|cover|lid/i.test(desc) && !/oil/i.test(desc)) {
+        // Cover plate: thin rectangle
+        var cover = new THREE.Mesh(new THREE.BoxGeometry(100, 4, 70), mat);
+        meshes.push(cover);
+      } else if (/base.*plate|plate.*base/i.test(desc)) {
+        // Base plate: wide, thin, long
+        var baseMat = new THREE.MeshPhongMaterial({ color: 0x475569, specular: 0x333333, shininess: 40 });
+        var base = new THREE.Mesh(new THREE.BoxGeometry(120, 6, 80), baseMat);
+        meshes.push(base);
+      } else if (/gear/i.test(desc) && /drive/i.test(desc)) {
+        // Drive gear with teeth effect
+        var gMat = new THREE.MeshPhongMaterial({ color: 0xF59E0B, specular: 0x888888, shininess: 100 });
+        var teethMatch = desc.match(/_?(\d+)t/);
+        var teeth = teethMatch ? parseInt(teethMatch[1]) : 20;
+        var radius = teeth * 0.9; // Module 2 approximation
+        var body = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 8, 32), gMat);
+        body.rotation.x = Math.PI / 2;
+        meshes.push(body);
+        // Add inner hub
+        var hub = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 10, 16), gMat);
+        hub.rotation.x = Math.PI / 2;
+        meshes.push(hub);
+      } else if (/gear/i.test(desc) && /driven/i.test(desc)) {
+        var gMat2 = new THREE.MeshPhongMaterial({ color: 0xEA580C, specular: 0x888888, shininess: 100 });
+        var teethMatch2 = desc.match(/_?(\d+)t/);
+        var teeth2 = teethMatch2 ? parseInt(teethMatch2[1]) : 40;
+        var radius2 = teeth2 * 0.9;
+        var body2 = new THREE.Mesh(new THREE.CylinderGeometry(radius2, radius2, 8, 48), gMat2);
+        body2.rotation.x = Math.PI / 2;
+        meshes.push(body2);
+        var hub2 = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 10, 16), gMat2);
+        hub2.rotation.x = Math.PI / 2;
+        meshes.push(hub2);
+      } else if (/gear.*output|output.*gear/i.test(desc)) {
+        var gMat3 = new THREE.MeshPhongMaterial({ color: 0xDC2626, specular: 0x888888, shininess: 100 });
+        var teethMatch3 = desc.match(/_?(\d+)t/);
+        var teeth3 = teethMatch3 ? parseInt(teethMatch3[1]) : 15;
+        var radius3 = teeth3 * 0.9;
+        var body3 = new THREE.Mesh(new THREE.CylinderGeometry(radius3, radius3, 8, 24), gMat3);
+        body3.rotation.x = Math.PI / 2;
+        meshes.push(body3);
+      } else if (/shaft.*main|main.*shaft/i.test(desc)) {
+        // Main shaft: long cylinder horizontal
+        var sMat = new THREE.MeshPhongMaterial({ color: 0x64748B, specular: 0x888888, shininess: 120 });
+        var shaft = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 70, 20), sMat);
+        shaft.rotation.z = Math.PI / 2;
+        meshes.push(shaft);
+        // Keyway bump
+        var key = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, 20), sMat);
+        meshes.push(key);
+      } else if (/shaft.*counter|counter.*shaft/i.test(desc)) {
+        var sMat2 = new THREE.MeshPhongMaterial({ color: 0x94A3B8, specular: 0x888888, shininess: 120 });
+        var shaft2 = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 55, 20), sMat2);
+        shaft2.rotation.z = Math.PI / 2;
+        meshes.push(shaft2);
+      } else if (/bearing/i.test(desc)) {
+        // Bearing: torus with inner/outer ring
+        var outerR = bSize >= 5 ? 14 : 12;
+        var tubeR = bSize >= 5 ? 4 : 3.5;
+        var bMat = new THREE.MeshPhongMaterial({ color: 0xCBD5E1, specular: 0x555555, shininess: 150 });
+        var outer = new THREE.Mesh(new THREE.TorusGeometry(outerR, tubeR, 12, 32), bMat);
+        meshes.push(outer);
+        // Inner ring
+        var inner = new THREE.Mesh(new THREE.TorusGeometry(outerR - tubeR * 1.5, tubeR * 0.5, 8, 24), bMat);
+        meshes.push(inner);
+      } else if (/bolt|screw/i.test(desc)) {
+        // Bolt with hex head + threaded shaft
+        var bMat = new THREE.MeshPhongMaterial({ color: 0xD4D4D8, specular: 0x888888, shininess: 140 });
+        var headR = mSize * 0.8;
+        var headH = mSize * 0.6;
+        var head = new THREE.Mesh(new THREE.CylinderGeometry(headR, headR, headH, 6), bMat);
+        head.position.y = 15 + headH / 2;
+        meshes.push(head);
+        var shaft = new THREE.Mesh(new THREE.CylinderGeometry(mSize * 0.3, mSize * 0.3, 30, 12), bMat);
+        meshes.push(shaft);
+      } else if (/nut/i.test(desc)) {
+        // Hex nut
+        var nR = mSize * 0.8;
+        var nH = mSize * 0.7;
+        var nMat = new THREE.MeshPhongMaterial({ color: 0xBFDDFF, specular: 0x888888, shininess: 140 });
+        var nut = new THREE.Mesh(new THREE.CylinderGeometry(nR, nR, nH, 6), nMat);
+        meshes.push(nut);
+      } else if (/washer/i.test(desc)) {
+        // Flat washer: thin torus
+        var wR = mSize * 0.65;
+        var wT = 1.2;
+        var wMat = new THREE.MeshPhongMaterial({ color: 0xE5E5E5, specular: 0x555555, shininess: 150 });
+        var washer = new THREE.Mesh(new THREE.TorusGeometry(wR, wT, 8, 32), wMat);
+        meshes.push(washer);
+      } else if (/spring/i.test(desc)) {
+        // Spring: coiled cylinder with wireframe
+        var sMat = new THREE.MeshPhongMaterial({ color: 0x7C3AED, specular: 0x888888, shininess: 60, wireframe: true });
+        var spring = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 25, 12, 10, true), sMat);
+        meshes.push(spring);
+      } else if (/ring.*snap|snap.*ring/i.test(desc)) {
+        // Snap ring: thin flat ring
+        var srR = mSize >= 25 ? 13 : 10;
+        var srMat = new THREE.MeshPhongMaterial({ color: 0x1F2937, specular: 0xAAAAAA, shininess: 130 });
+        var snap = new THREE.Mesh(new THREE.TorusGeometry(srR, 0.8, 6, 32), srMat);
+        meshes.push(snap);
+      } else if (/cap.*oil|oil.*cap/i.test(desc)) {
+        // Oil fill cap: small cylinder with head
+        var capMat = new THREE.MeshPhongMaterial({ color: 0xFBBF24, specular: 0x888888, shininess: 100 });
+        var capBody = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 8, 6), capMat);
+        meshes.push(capBody);
+        var capTop = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 2, 6), capMat);
+        capTop.position.y = 5;
+        meshes.push(capTop);
+      } else if (/plate|body|frame|block|chassis/i.test(desc)) {
+        meshes.push(new THREE.Mesh(new THREE.BoxGeometry(60, 8, 40), mat));
+      } else if (/shaft|rod|pin|axle|spindle/i.test(desc)) {
+        var shaft = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 80, 24), mat);
+        shaft.rotation.z = Math.PI / 2;
+        meshes.push(shaft);
+      } else if (/gear|cog|sprocket/i.test(desc)) {
+        meshes.push(new THREE.Mesh(new THREE.CylinderGeometry(18, 18, 10, 32), mat));
+      } else if (/bearing|bush/i.test(desc)) {
+        meshes.push(new THREE.Mesh(new THREE.TorusGeometry(12, 4, 16, 32), mat));
+      } else if (/cover|lid|cap/i.test(desc)) {
+        meshes.push(new THREE.Mesh(new THREE.BoxGeometry(60, 3, 40), mat));
+      } else {
+        meshes.push(new THREE.Mesh(new THREE.BoxGeometry(30, 20, 30), mat));
+      }
+
+      meshes.forEach(function (m) { g.add(m); });
+      return g;
+    }
+
+    function mergeGroupGeometries(group) {
+      var geometries = [];
+
+      group.updateMatrixWorld(true);
+
+      group.traverse(function (child) {
+        if (child.isMesh && child.geometry) {
+          var g = child.geometry.clone();
+          // Apply world transform of the child mesh (relative to group)
+          g.applyMatrix4(child.matrixWorld);
+          geometries.push(g);
+        }
+      });
+
+      if (geometries.length === 0) return new THREE.BufferGeometry();
+      if (geometries.length === 1) return geometries[0];
+
+      // Manual position merge + index rebuild
+      var totalVertices = 0;
+      geometries.forEach(function (g) { totalVertices += g.attributes.position.count; });
+
+      var mergedPositions = new Float32Array(totalVertices * 3);
+      var mergedNormals = new Float32Array(totalVertices * 3);
+      var mergedIndices = [];
+      var vertexOffset = 0;
+      var indexOffset = 0;
+
+      geometries.forEach(function (g) {
+        var pos = g.attributes.position.array;
+        var nrm = g.attributes.normal ? g.attributes.normal.array : null;
+        mergedPositions.set(pos, vertexOffset * 3);
+        if (nrm) mergedNormals.set(nrm, vertexOffset * 3);
+
+        var count = g.attributes.position.count;
+        if (g.index) {
+          var idx = g.index.array;
+          for (var i = 0; i < idx.length; i++) mergedIndices.push(idx[i] + vertexOffset);
+        } else {
+          for (var i = 0; i < count; i++) mergedIndices.push(vertexOffset + i);
+        }
+        vertexOffset += count;
+      });
+
+      var merged = new THREE.BufferGeometry();
+      merged.setAttribute('position', new THREE.BufferAttribute(mergedPositions, 3));
+      merged.setAttribute('normal', new THREE.BufferAttribute(mergedNormals, 3));
+      merged.setIndex(mergedIndices);
+      return merged;
+    }
+
+     function handleSTLFile(file) {
       var name = file.name.toLowerCase();
       var ext = getFileExtension(name);
+
+      // Validate file format against current design mode
+      if (activeDesignTab === 'zhongxing') {
+        var zhongxingExts = ['stl', 'step', 'stp', 'pdf', 'jpg', 'jpeg', 'png'];
+        if (zhongxingExts.indexOf(ext) === -1) {
+          alert('通用建模模式仅支持: STL、STEP、PDF、JPG、PNG 格式');
+          return;
+        }
+      } else if (activeDesignTab === 'jingmi') {
+        var jingmiExts = ['prt', 'asm', 'step', 'stp'];
+        if (jingmiExts.indexOf(ext) === -1) {
+          alert('原生精密模式仅支持: PRT、ASM、STEP 格式');
+          return;
+        }
+      }
+      // 全域设计 accepts all formats, no validation needed
+
       var isSTL = ext === 'stl';
       var isSTEP = ext === 'step' || ext === 'stp';
+      var isASM = ext === 'asm' || ext === 'prt';
       var canPreviewInBrowser = isBrowserPreviewFile(name);
-      
+
       if (!isSupportedVisualPreviewFile(name)) {
         alert('请上传 AI-Visual-Preview 支持的文件：STL/PLY/OBJ/3MF、STEP/IGES、PRT/ASM、DRW/DWG/DXF、PDF、图片工程图');
         return;
@@ -3268,13 +4007,13 @@ function toggleHistoryOverlay() {
         alert('文件大小不能超过 10MB');
         return;
       }
-      
+
       getActiveLoading().classList.add('show');
-      
+
       // Assign a new file ID immediately
       var newFileId = Date.now().toString(36);
       activeFileId = newFileId;
-      
+
       if (isSTEP) {
         loadSTEP(file, function() {
           getActiveLoading().classList.remove('show');
@@ -3288,6 +4027,13 @@ function toggleHistoryOverlay() {
         clearVersionHistory();
         saveFileToHistory(file, newFileId);
         setTimeout(autoAnalyzeGeometry, 200);
+      } else if (isASM) {
+        loadASMFile(file, function() {
+          getActiveLoading().classList.remove('show');
+          clearVersionHistory();
+          saveFileToHistory(file, newFileId);
+          autoAnalyzeGeometry();
+        });
       } else if (!canPreviewInBrowser) {
         getActiveLoading().classList.remove('show');
         clearVersionHistory();
@@ -3295,40 +4041,36 @@ function toggleHistoryOverlay() {
         showPendingPreview(file);
       }
     }
-    
+
     // Load STEP file using occt-import-js
     function loadSTEP(file, callback) {
       var reader = new FileReader();
       reader.onload = function(e) {
         var buffer = new Uint8Array(e.target.result);
-        
+
         occtimportjs().then(function(occt) {
           var result = occt.ReadStepFile(buffer, null);
           console.log('STEP parsed, meshes:', result.meshes.length);
-          
+
           if (result.meshes.length === 0) {
             alert('STEP 文件中未找到几何体');
             if (callback) callback();
             return;
           }
-          
-          // Remove old mesh
-          if (currentMesh) {
-            scene.remove(currentMesh);
-            if (currentMesh.geometry) currentMesh.geometry.dispose();
-            if (currentMesh.material) currentMesh.material.dispose();
-          }
-          
+
+          // Remove old mesh/group
+          disposeCurrentModel();
+
           // Merge all meshes from STEP into one geometry
           var positions = [];
           var indices = [];
           var indexOffset = 0;
-          
+
           for (var mi = 0; mi < result.meshes.length; mi++) {
             var m = result.meshes[mi];
             var pos = m.attributes.position.array;
             var idx = m.index.array;
-            
+
             for (var pi = 0; pi < pos.length; pi++) {
               positions.push(pos[pi]);
             }
@@ -3337,37 +4079,38 @@ function toggleHistoryOverlay() {
             }
             indexOffset += pos.length / 3;
           }
-          
+
           var geometry = new THREE.BufferGeometry();
           geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
           geometry.setIndex(indices);
           geometry.computeVertexNormals();
           geometry.computeBoundingBox();
-          
+
           var center = new THREE.Vector3();
           geometry.boundingBox.getCenter(center);
           geometry.translate(-center.x, -center.y, -center.z);
-          
+
           var size = new THREE.Vector3();
           geometry.boundingBox.getSize(size);
           var maxDim = Math.max(size.x, size.y, size.z);
           var scale = 80 / maxDim;
-          
+
           var material = new THREE.MeshPhongMaterial({
             color: 0x296AFA, specular: 0x333333, shininess: 100
           });
-          
+
           currentMesh = new THREE.Mesh(geometry, material);
           currentMesh.scale.set(scale, scale, scale);
-          scene.add(currentMesh);
-          
-          document.getElementById('previewControls').style.display = 'flex';
-          window.enableChat();
+           scene.add(currentMesh);
+
+         document.getElementById('previewControls').style.display = 'flex';
+         if (currentMesh.userData) currentMesh.userData.isASM = false;
+        window.enableChat();
           resetCamera();
-          
+
           console.log('STEP loaded, triangles:', indices.length / 3);
           if (callback) callback();
-          
+
         }).catch(function(err) {
           console.error('STEP parse error:', err);
           alert('STEP 文件解析失败: ' + err.message);
@@ -3377,23 +4120,38 @@ function toggleHistoryOverlay() {
       reader.readAsArrayBuffer(file);
     }
 
-    // ========== UPLOAD HISTORY (per project + tab, localStorage) ==========
+    // ========== UPLOAD HISTORY (per project + tab, localStorage + in-memory cache) ==========
+    // In-memory cache keeps full base64 data across the current session even when localStorage quota exceeded
+    var _fileHistoryCache = {};
+
     function getFileHistoryKey(tabId) {
       var pid = currentProjectId || 'default';
       return 'stl_upload_history_' + pid + '_' + (tabId || activeDesignTab);
     }
 
     function getFileHistory() {
+      var key = getFileHistoryKey();
+      // Prefer in-memory cache (always has full data during current session)
+      if (_fileHistoryCache[key]) {
+        return _fileHistoryCache[key];
+      }
       try {
-        return JSON.parse(localStorage.getItem(getFileHistoryKey()) || '[]');
+        var fromStorage = JSON.parse(localStorage.getItem(key) || '[]');
+        _fileHistoryCache[key] = fromStorage;
+        return fromStorage;
       } catch (e) { return []; }
+    }
+
+    function _setHistoryInMemory(history) {
+      var key = getFileHistoryKey();
+      _fileHistoryCache[key] = history;
     }
 
     function saveFileToHistory(file, fileId) {
       var key = getFileHistoryKey();
       const history = getFileHistory();
       const id = fileId || Date.now().toString(36);
-      
+
       // Store file as base64 so it can be reloaded
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -3408,65 +4166,82 @@ function toggleHistoryOverlay() {
         // Prepend (newest first), limit to 20
         history.unshift(entry);
         if (history.length > 20) history.pop();
+
+        // Always keep full data in memory (for current session)
+        _setHistoryInMemory(history);
+
+        // Try to save to localStorage with full data
         try {
           localStorage.setItem(key, JSON.stringify(history));
         } catch (err) {
-          // Storage full — remove oldest entries
-          while (history.length > 3) {
-            history.pop();
-            try { localStorage.setItem(key, JSON.stringify(history)); break; }
-            catch (e2) { /* keep popping */ }
+          // localStorage full. Keep data only for newest 5 entries, drop from older entries.
+          // In-memory cache still keeps all data intact for this session.
+          var lightweightHistory = history.map(function(h, idx) {
+            if (idx < 5) return h;
+            return { id: h.id, name: h.name, size: h.size, time: h.time, projectId: h.projectId, data: null };
+          });
+          try {
+            localStorage.setItem(key, JSON.stringify(lightweightHistory));
+          } catch (e3) {
+            var minHistory = history.map(function(h) {
+              return { id: h.id, name: h.name, size: h.size, time: h.time, projectId: h.projectId, data: null };
+            });
+            try { localStorage.setItem(key, JSON.stringify(minHistory)); } catch(e4) {}
           }
         }
-        renderFileHistory();
+        // Always render using the full in-memory history
+        renderFileHistory(history);
       };
       reader.readAsDataURL(file);
     }
 
-    function renderFileHistory() {
+    function renderFileHistory(inMemoryHistory) {
       var tabIdx = DESIGN_TABS.indexOf(activeDesignTab);
       var list = document.getElementById('fileList' + tabIdx);
-      var history = getFileHistory();
-      
+      if (!list) return; // guard against missing element
+
+      // Use in-memory history if provided (always fresh), else read from localStorage
+      var history = inMemoryHistory || getFileHistory();
+
       // Remove old items, keep empty placeholder
       var emptyEl = list.querySelector('.file-list-empty');
       list.querySelectorAll('.file-item').forEach(el => el.remove());
-      
+
       if (history.length === 0) {
         if (emptyEl) emptyEl.style.display = 'block';
         return;
       }
       if (emptyEl) emptyEl.style.display = 'none';
-      
+
       history.forEach(function(entry) {
         const div = document.createElement('div');
         div.className = 'file-item' + (entry.id === activeFileId ? ' active' : '');
-        
+
         const sizeStr = entry.size < 1024 ? entry.size + ' B'
           : entry.size < 1048576 ? (entry.size / 1024).toFixed(1) + ' KB'
           : (entry.size / 1048576).toFixed(1) + ' MB';
-        
+
         const timeStr = formatTime(entry.time);
-        
+
         div.innerHTML = '<div class="file-item-icon">📄</div>'
           + '<div class="file-item-info">'
           + '<div class="file-item-name">' + escapeHtml(entry.name) + '</div>'
           + '<div class="file-item-meta">' + sizeStr + ' · ' + timeStr + '</div>'
           + '</div>'
           + '<div class="file-item-delete" data-id="' + entry.id + '">✕</div>';
-        
+
         // Click to reload
         div.addEventListener('click', function(e) {
           if (e.target.classList.contains('file-item-delete')) return;
           loadFileFromHistory(entry.id);
         });
-        
+
         // Delete button
         div.querySelector('.file-item-delete').addEventListener('click', function(e) {
           e.stopPropagation();
           removeFileFromHistory(entry.id);
         });
-        
+
         list.appendChild(div);
       });
     }
@@ -3474,19 +4249,36 @@ function toggleHistoryOverlay() {
     function loadFileFromHistory(id) {
       const history = getFileHistory();
       const entry = history.find(function(h) { return h.id === id; });
-      if (!entry || !entry.data) return;
-      
+      if (!entry) return;
+
+      // If entry has no saved data (metadata-only, localStorage was full), can't reload.
+      if (!entry.data) {
+        alert('该文件数据未成功保存到本地存储，可能需要重新上传。');
+        return;
+      }
+
       // Convert base64 data URL back to ArrayBuffer
       const base64 = entry.data.split(',')[1];
       const binary = atob(base64);
       const bytes = new Uint8Array(binary.length);
       for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      
+
       var ext = getFileExtension(entry.name);
       var file = new File([bytes], entry.name);
       if (ext === 'step' || ext === 'stp') {
         getActiveLoading().classList.add('show');
         loadSTEP(file, function() {
+          getActiveLoading().classList.remove('show');
+          activeFileId = id;
+          renderFileHistory();
+          switchVersionHistory(id);
+        });
+        return;
+      }
+
+      if (ext === 'asm' || ext === 'prt') {
+        getActiveLoading().classList.add('show');
+        loadASMFile(file, function() {
           getActiveLoading().classList.remove('show');
           activeFileId = id;
           renderFileHistory();
@@ -3507,13 +4299,13 @@ function toggleHistoryOverlay() {
       const loader = new THREE.STLLoader();
       try {
         const geometry = loader.parse(bytes.buffer);
-        
+
         if (currentMesh) {
           scene.remove(currentMesh);
           if (currentMesh.geometry) currentMesh.geometry.dispose();
           if (currentMesh.material) currentMesh.material.dispose();
         }
-        
+
         geometry.computeBoundingBox();
         const center = new THREE.Vector3();
         geometry.boundingBox.getCenter(center);
@@ -3522,23 +4314,24 @@ function toggleHistoryOverlay() {
         geometry.boundingBox.getSize(size);
         const maxDim = Math.max(size.x, size.y, size.z);
         const scale = 80 / maxDim;
-        
+
         const material = new THREE.MeshPhongMaterial({ color: 0x296AFA, specular: 0x333333, shininess: 100 });
         currentMesh = new THREE.Mesh(geometry, material);
         currentMesh.scale.set(scale, scale, scale);
-        currentMesh.rotation.x = -Math.PI / 2;
-        scene.add(currentMesh);
-        
-        document.getElementById('previewControls').style.display = 'flex';
+         currentMesh.rotation.x = -Math.PI / 2;
+         scene.add(currentMesh);
+
+         document.getElementById('previewControls').style.display = 'flex';
+        if (currentMesh.userData) currentMesh.userData.isASM = false;
         window.enableChat();
         resetCamera();
-        
+
         activeFileId = id;
         renderFileHistory();
-        
+
         // Restore version history for this file
         switchVersionHistory(id);
-        
+
       } catch (e) {
         console.error('Error loading from history:', e);
       }
@@ -3547,7 +4340,8 @@ function toggleHistoryOverlay() {
     function removeFileFromHistory(id) {
       var key = getFileHistoryKey();
       var history = getFileHistory().filter(function(h) { return h.id !== id; });
-      localStorage.setItem(key, JSON.stringify(history));
+      try { localStorage.setItem(key, JSON.stringify(history)); } catch(e) {}
+      _setHistoryInMemory(history);
       // Also remove its version history
       try { localStorage.removeItem(VERSION_STORE_PREFIX + id); } catch(e) {}
       if (activeFileId === id) activeFileId = null;
@@ -3924,7 +4718,7 @@ function toggleHistoryOverlay() {
       var snap = ensureRuntimeSnapshot(vid);
       var rec = currentVersionRecords.find(function(r) { return r.id === vid; });
       if (!snap || !snap.geometry || !rec) return;
-      
+
       // Save current live state if not already backed up
       if (!liveStateBackup) {
         liveStateBackup = {
@@ -3938,7 +4732,7 @@ function toggleHistoryOverlay() {
           transparent: currentMesh.material.transparent
         };
       }
-      
+
       // Apply version snapshot to the mesh
       currentMesh.geometry.dispose();
       currentMesh.geometry = snap.geometry.clone();
@@ -3949,7 +4743,7 @@ function toggleHistoryOverlay() {
       currentMesh.material.needsUpdate = true;
       previewingVersionId = vid;
     }
-    
+
     function restoreLiveState() {
       if (!liveStateBackup || !currentMesh) return;
       currentMesh.geometry.dispose();
@@ -3969,11 +4763,11 @@ function toggleHistoryOverlay() {
     // ========== TOGGLE ORIGINAL / CURRENT ==========
     let isShowingOriginal = false;
     let currentStateBackup = null;
-    
+
     window.toggleOriginal = function() {
       if (!originalSnapshot || !originalSnapshot.geometry || !currentMesh) return;
       var btn = document.getElementById('btn-original');
-      
+
       if (!isShowingOriginal) {
         // 保存当前修改状态
         currentStateBackup = {
@@ -4035,7 +4829,7 @@ function toggleHistoryOverlay() {
         }
       }
       if (!target) return;
-      
+
       // Scroll into view
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       // Highlight briefly
@@ -4044,7 +4838,7 @@ function toggleHistoryOverlay() {
     }
 
     // ========== VERSION MENU ACTIONS ==========
-    
+
     // Close all menus on click outside
     document.addEventListener('click', function() {
       document.querySelectorAll('.version-menu.show').forEach(function(m) { m.classList.remove('show'); });
@@ -4126,6 +4920,30 @@ function toggleHistoryOverlay() {
 
     // Init file history on page load
     renderFileHistory();
+
+    // Auto-load first STL file if exists (wait for Three.js init)
+    (function() {
+      function tryAutoLoad() {
+        if (!isInitialized) {
+          setTimeout(tryAutoLoad, 100);
+          return;
+        }
+        var history = getFileHistory();
+        var firstStl = history.find(function(e) {
+          return (e.name || '').toLowerCase().endsWith('.stl');
+        });
+        if (firstStl) {
+          loadFileFromHistory(firstStl.id);
+        } else {
+          var firstAsm = history.find(function(e) {
+            var n = (e.name || '').toLowerCase();
+            return n.endsWith('.asm') || n.endsWith('.prt');
+          });
+          if (firstAsm) loadFileFromHistory(firstAsm.id);
+        }
+      }
+      tryAutoLoad();
+    })();
 
     // Show project name from URL params
     (function() {
